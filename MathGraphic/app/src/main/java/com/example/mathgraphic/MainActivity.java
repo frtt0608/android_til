@@ -45,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
         MyView.whatColor = 5; System.out.println(MyView.whatColor);
     }
 
-
+    public void clearPaint(View v) {
+        MyView.clearPaint();
+    }
 }
 

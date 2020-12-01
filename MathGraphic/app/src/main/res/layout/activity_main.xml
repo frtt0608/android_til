@@ -62,6 +62,13 @@
             android:layout_weight="1"
             android:onClick="setBlack"/>
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="초기화"
+            android:layout_weight="1"
+            android:onClick="clearPaint"/>
+
     </LinearLayout>
 
     <com.example.mathgraphic.MyView

@@ -15,14 +15,14 @@ public class MyView extends View {
     Paint p4 = new Paint();
     Paint p5 = new Paint();
 
-    int myData_x[] = new int[30000];
-    int myData_y[] = new int[30000];
-    int myData_color[] = new int[30000];
+    static int myData_x[] = new int[30000];
+    static int myData_y[] = new int[30000];
+    static int myData_color[] = new int[30000];
 
-    static int radius = 15;
+    static int radius = 20;
     static int whatColor = 0;
 
-    int dataNumber = 0;
+    static int dataNumber = 0;
     int mx, my;
 
     public MyView(Context context, AttributeSet attr) {
@@ -60,9 +60,8 @@ public class MyView extends View {
             if(myData_color[i] == 5) {
                 canvas.drawCircle(myData_x[i], myData_y[i], radius, p5);
             }
-
-            invalidate();
         }
+        invalidate();
     }
 
     public void saveData() {
@@ -79,5 +78,13 @@ public class MyView extends View {
         saveData();
 
         return true;
+    }
+
+    static public void clearPaint() {
+        for(int i=1; i<dataNumber; i++) {
+            myData_x[i] = 0;
+            myData_y[i] = 0;
+            myData_color[i] = 0;
+        }
     }
 }
