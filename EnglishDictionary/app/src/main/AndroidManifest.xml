@@ -9,13 +9,20 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.EnglishDictionary">
-        <activity android:name=".MainActivity">
+        <activity android:name=".StartCsc" android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".ActivityStudy" android:screenOrientation="landscape"></activity>
+        <activity android:name=".ActivityStudy2" android:screenOrientation="landscape"></activity>
+        <activity android:name=".ActivityStudy3" android:screenOrientation="landscape"></activity>
+        <activity android:name=".ActivityStudy4" android:screenOrientation="landscape"></activity>
+        <activity android:name=".ActivityStudy5" android:screenOrientation="landscape"></activity>
+        <activity android:name=".About" android:screenOrientation="landscape"></activity>
     </application>
 
 </manifest>

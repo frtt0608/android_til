@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.heon9u.englishdictionary.StudyView
+    <com.heon9u.englishdictionary.StudyView5
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
