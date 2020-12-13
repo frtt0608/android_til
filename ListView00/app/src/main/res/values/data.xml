@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="people">
+        <item>이순신</item>
+        <item>광개토대왕</item>
+        <item>신사임당</item>
+        <item>세종대왕</item>
+        <item>이성계</item>
+        <item>윤봉길</item>
+        <item>안중근</item>
+        <item>을지문덕</item>
+        <item>강감찬</item>
+        <item>이황</item>
+        <item>이이</item>
+        <item>장영실</item>
+    </string-array>
+</resources>
