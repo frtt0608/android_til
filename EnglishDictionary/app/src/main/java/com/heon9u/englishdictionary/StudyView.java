@@ -1001,17 +1001,22 @@ public class StudyView extends SurfaceView implements Callback, GestureOverlayVi
 
         if (dicOk == 1) {
             if (x > btnForDictionary[0].x && x < (btnForDictionary[0].x + btnForDictionary[0].w * 2) && y > btnForDictionary[0].y && y < (btnForDictionary[0].y + btnForDictionary[0].h * 2)) {
-                if (wordForDelete[0] != null) wordToDelete = wordForDelete[0];
+                if (wordForDelete[0] != null)
+                    wordToDelete = wordForDelete[0];
             }
             if (x > btnForDictionary[1].x && x < (btnForDictionary[1].x + btnForDictionary[1].w * 2) && y > btnForDictionary[1].y && y < (btnForDictionary[1].y + btnForDictionary[1].h * 2)) {
-                if (wordForDelete[1] != null) wordToDelete = wordForDelete[1];
+                if (wordForDelete[1] != null)
+                    wordToDelete = wordForDelete[1];
             }
             if (x > btnForDictionary[2].x && x < (btnForDictionary[2].x + btnForDictionary[2].w * 2) && y > btnForDictionary[2].y && y < (btnForDictionary[2].y + btnForDictionary[2].h * 2))
-                if (wordForDelete[2] != null) wordToDelete = wordForDelete[2];
+                if (wordForDelete[2] != null)
+                    wordToDelete = wordForDelete[2];
             if (x > btnForDictionary[3].x && x < (btnForDictionary[3].x + btnForDictionary[3].w * 2) && y > btnForDictionary[3].y && y < (btnForDictionary[3].y + btnForDictionary[3].h * 2))
-                if (wordForDelete[3] != null) wordToDelete = wordForDelete[3];
+                if (wordForDelete[3] != null)
+                    wordToDelete = wordForDelete[3];
             if (x > btnForDictionary[4].x && x < (btnForDictionary[4].x + btnForDictionary[4].w * 2) && y > btnForDictionary[4].y && y < (btnForDictionary[4].y + btnForDictionary[4].h * 2))
-                if (wordForDelete[4] != null) wordToDelete = wordForDelete[4];
+                if (wordForDelete[4] != null)
+                    wordToDelete = wordForDelete[4];
 
             SQLiteDatabase db = m_helper.getWritableDatabase();
 
