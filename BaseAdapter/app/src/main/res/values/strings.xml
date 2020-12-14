@@ -1,3 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BaseAdapter</string>
+
+    <string name="app_name">세계여러나라 탐방</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <string-array name="nation">
+        <item>대한민국</item>
+        <item>중국</item>
+        <item>스웨덴</item>
+        <item>태국</item>
+        <item>프랑스</item>
+        <item>러시아</item>
+        <item>이탈리아</item>
+        <item>일본</item>
+        <item>베트남</item>
+        <item>나이지리아</item>
+    </string-array>
+
+    <string-array name="explain">
+        <item>: IT 강국이며 교육열이 높은 나라 </item>
+        <item>: 인구가 세계 1위인 국가. 진(秦)나라의 시황제(始皇帝)가 처음으로 중국을 통일함.</item>
+        <item>: 유럽 북부 스칸디나비아반도 위치함. 게르만족인 스웨덴인이 95％를 차지하며 핀란드인이 4% 정도를 차지함.</item>
+        <item>: 관광대국이며  1939년 국호를 시암(Siam)에서 타이로 변경하였다. 동남아시아에서 유럽 국가의 식민 지배를 받지 않은 유일한 나라이다.</item>
+        <item>: 유럽에서 3번째로 큰 나라이며 에펠탑으로 유명하다. 종교는 가톨릭(83-88%)인이 제일 많다. </item>
+        <item>: 세계에서 영토가 제일 큰 나라이며 1991년 12월 31일 소련이 해체, 독립국가가 되었다..</item>
+        <item>: 5세기 서로마제국의 멸망 이후 국토가 분열되었다가 1870년 통일을 이루었다.</item>
+        <item>: 1615년 도쿠가와 이에야스가 전국을 통일하였으며 세계 제 2차대전을 일으켰다.</item>
+        <item>: 동남아시아에 있는 국가. 1884년 프랑스 식민지가 되었다가 1945년 2차 세계대전 후 독립을 선언함. </item>
+        <item>: 아프리카 국가이며 인구가 세계 8위이며 영어를 사용하고 있음. 1900년 이후 영국의 통치를 받다가 1960년 10월 영국 연방으로 독립함.</item>
+    </string-array>
+
+    <string-array name="population">
+        <item>5천 백만명</item>
+        <item>13억 7천만명</item>
+        <item>9백 8십만명</item>
+        <item>6천 8백만명</item>
+        <item>6천 6백만명</item>
+        <item>1억 4천만명</item>
+        <item>6천 2백만명</item>
+        <item>1억 2천만명</item>
+        <item>9천 5백만명</item>
+        <item>1억 8천만명</item>
+    </string-array>
+
+    <string-array name="capital">
+        <item>서울</item>
+        <item>베이징</item>
+        <item>스톡홀름</item>
+        <item>방콕</item>
+        <item>파리</item>
+        <item>모스코바</item>
+        <item>로마</item>
+        <item>도쿄</item>
+        <item>하노이</item>
+        <item>아부자</item>
+    </string-array>
+
 </resources>
