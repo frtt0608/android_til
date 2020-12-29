@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -13,7 +14,6 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
@@ -21,11 +21,14 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
     TextView textView;
-    TextView busNumer;
+    TextView busNumber;
+    EditText searchNumber;
+
+    String serviceKey = "d8QNMjZBRSclKcQM3n8WO20p%2F1ii%2FmWRAWA8%2F5dcWlMem79RLlU8%2B%2BhGGyOdJFkPn2Hr8xa%2Fr%2BAqEkpelMR5BQ%3D%3D";
+    String serviceUrl_getBusRouteList = "http://ws.bus.go.kr/api/rest/busRouteInfo/getBusRouteList";
+    String serviceUrl_getStaionByRoute = "http://ws.bus.go.kr/api/rest/busRouteInfo/getStaionByRoute";
     String getData;
-    int busNumber = 0;
-    int busNum = 503;
-    String strSrch = busNumber + "";
+    String strSrch;
     int count;
 
     @Override
@@ -33,17 +36,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        busNumber = (TextView) findViewById(R.id.bus);
         textView = (TextView) findViewById(R.id.data);
-        busNumer = (TextView) findViewById(R.id.bus);
+        searchNumber = (EditText) findViewById(R.id.searchNumber);
 
-        //     String serviceUrl = "http://ws.bus.go.kr/api/rest/busRouteInfo/getBusRouteList";
-
-        String serviceUrl = "http://ws.bus.go.kr/api/rest/busRouteInfo/getBusRouteList";
-
-        String serviceKey = "lI0Ngu5M%2BJewHO%2BGcadPtiLVGTc6U4lgwJW8sgKiDLQVZ31N%2BwpXpAiPGoFaJJE0VsqzxAZNruDG8BC3kxkFhQ%3D%3D";
-
-        //가져올 정보를 strUrl에 저장함
-        String strUrl = serviceUrl + "?ServiceKey=" + serviceKey + "&strSrch=" + strSrch;
+        String strUrl = serviceUrl_getBusRouteList + "?ServiceKey=" + serviceKey + "&strSrch=" + strSrch;
 
         DownloadWebContent dwc1 = new DownloadWebContent();
         dwc1.execute(strUrl);
@@ -56,8 +53,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 return (String) downloadByUrl((String) urls[0]);
             } catch (IOException e) {
-                System.out.println("첫 번째 content");
-                System.out.println("다운로드 실패");
+                System.out.println(e.getMessage());
                 return "다운로드 실패";
             }
         }
@@ -80,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
 
                 //parser 에 url를 입력함
                 xmlpp.setInput(new StringReader(result));
-
 
                 //parser 이벤트를 저장할 변수 지정
                 int eventType = xmlpp.getEventType();
@@ -117,30 +112,20 @@ public class MainActivity extends AppCompatActivity {
                 textView.setText(e.getMessage());
             }
 
-            String serviceUrl = "http://ws.bus.go.kr/api/rest/busRouteInfo/getStaionByRoute";
-
-            String serviceKey = "lI0Ngu5M%2BJewHO%2BGcadPtiLVGTc6U4lgwJW8sgKiDLQVZ31N%2BwpXpAiPGoFaJJE0VsqzxAZNruDG8BC3kxkFhQ%3D%3D";
-
-            String strUrl = serviceUrl + "?ServiceKey=" + serviceKey + "&busRouteId=" + busRouteId;
+            String strUrl = serviceUrl_getStaionByRoute + "?ServiceKey=" + serviceKey + "&busRouteId=" + busRouteId;
 
             DownloadWebContent2 dwc2 = new DownloadWebContent2();
             dwc2.execute(strUrl);
         }
 
         public String downloadByUrl(String myurl) throws IOException {
-            //Http 통신: HttpURLConnection 클래스를 활용해 데이터를 얻는다.
 
             HttpURLConnection conn = null;
+
             try {
                 //요청 URL, 전달받은 url string 으로 URL 객체를 만듦
                 URL url = new URL(myurl);
                 conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setDoInput(true);
-                System.out.println(conn);
-
-                InputStream is = conn.getInputStream();
-                System.out.println("is");
 
                 BufferedInputStream buffer = new BufferedInputStream(conn.getInputStream());
                 BufferedReader buffer_reader = new BufferedReader(new InputStreamReader(buffer, "utf-8"));
@@ -149,7 +134,6 @@ public class MainActivity extends AppCompatActivity {
                 getData = "";
                 while ((line = buffer_reader.readLine()) != null) {
                     getData += line;
-
                 }
 
                 return getData;
@@ -168,8 +152,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 return (String) downloadByUrl((String) urls[0]);
             } catch (IOException e) {
-                System.out.println("두번째 Content");
-                System.out.println("다운로드 실패");
+                System.out.println(e.getMessage());
                 return "다운로드 실패";
             }
         }
@@ -230,7 +213,6 @@ public class MainActivity extends AppCompatActivity {
                     } else if (eventType == XmlPullParser.TEXT) {
                         if (bus_headerCd) {
                             headerCd = xmlpp.getText();
-                            // textView.append("headerCd: " + headerCd + "\n");
                             bus_headerCd = false;
                         }
 
@@ -290,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
                 URL url = new URL(myurl);
                 conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
-                //결과를 InputStream으로 받아서 INputStreamReader, BufferedReader로 캐스팅한다.
+
                 BufferedInputStream buffer = new BufferedInputStream(conn.getInputStream());
                 buffer_reader = new BufferedReader(new InputStreamReader(buffer, "utf-8"));
 
@@ -298,7 +280,6 @@ public class MainActivity extends AppCompatActivity {
                 getData = "";
                 while ((line = buffer_reader.readLine()) != null) {
                     getData += line;
-
                 }
 
                 return getData;
@@ -309,98 +290,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void plusBusNumber(View v) {
+    public void searchBusNumber(View v) {
+        strSrch = searchNumber.getText().toString();
 
-        busNum += 1;
-
-        String serviceUrl = "http://ws.bus.go.kr/api/rest/busRouteInfo/getBusRouteList";
-        String serviceKey = "lI0Ngu5M%2BJewHO%2BGcadPtiLVGTc6U4lgwJW8sgKiDLQVZ31N%2BwpXpAiPGoFaJJE0VsqzxAZNruDG8BC3kxkFhQ%3D%3D";
-        strSrch = busNum + "";
-
-        //가져올 정보를 strUrl에 저장함
-        String strUrl = serviceUrl + "?ServiceKey=" + serviceKey + "&strSrch=" + strSrch;
-//
+        String strUrl = serviceUrl_getBusRouteList + "?ServiceKey=" + serviceKey + "&strSrch=" + strSrch;
         DownloadWebContent dwc1 = new DownloadWebContent();
         dwc1.execute(strUrl);
+
         textView.setText("");
-        busNumer.setText("");
-        busNumer.append("버스번호:");
-        busNumer.append(strSrch + "\n");
+        busNumber.setText("");
+        busNumber.append("버스번호:");
+        busNumber.append(strSrch + "\n");
     }
-
-    public void minusBusNumber(View v) {
-
-        busNum -= 1;
-
-        String serviceUrl = "http://ws.bus.go.kr/api/rest/busRouteInfo/getBusRouteList";
-        String serviceKey = "lI0Ngu5M%2BJewHO%2BGcadPtiLVGTc6U4lgwJW8sgKiDLQVZ31N%2BwpXpAiPGoFaJJE0VsqzxAZNruDG8BC3kxkFhQ%3D%3D";
-        strSrch = busNum + "";
-
-        //가져올 정보를 strUrl에 저장함
-        String strUrl = serviceUrl + "?ServiceKey=" + serviceKey + "&strSrch=" + strSrch;
-//
-        DownloadWebContent dwc1 = new DownloadWebContent();
-        dwc1.execute(strUrl);
-        textView.setText("");
-        busNumer.setText("");
-        busNumer.append("버스번호:");
-        busNumer.append(strSrch + "\n");
-    }
-
-    public void resetCurrentBus(View v) {
-
-        //  busNum+=1;
-        String serviceUrl = "http://ws.bus.go.kr/api/rest/busRouteInfo/getBusRouteList";
-        String serviceKey = "lI0Ngu5M%2BJewHO%2BGcadPtiLVGTc6U4lgwJW8sgKiDLQVZ31N%2BwpXpAiPGoFaJJE0VsqzxAZNruDG8BC3kxkFhQ%3D%3D";
-        strSrch = busNum + "";
-
-        //가져올 정보를 strUrl에 저장함
-        String strUrl = serviceUrl + "?ServiceKey=" + serviceKey + "&strSrch=" + strSrch;
-
-        DownloadWebContent dwc1 = new DownloadWebContent();
-        dwc1.execute(strUrl);
-        textView.setText("");
-        busNumer.setText("");
-        busNumer.append("버스번호:");
-        busNumer.append(strSrch + "\n");
-    }
-
-    public void plusBaek(View v) {
-        busNum += 100;
-        String serviceUrl = "http://ws.bus.go.kr/api/rest/busRouteInfo/getBusRouteList";
-        String serviceKey = "lI0Ngu5M%2BJewHO%2BGcadPtiLVGTc6U4lgwJW8sgKiDLQVZ31N%2BwpXpAiPGoFaJJE0VsqzxAZNruDG8BC3kxkFhQ%3D%3D";
-        strSrch = busNum + "";
-
-        //가져올 정보를 strUrl에 저장함
-        String strUrl = serviceUrl + "?ServiceKey=" + serviceKey + "&strSrch=" + strSrch;
-
-        DownloadWebContent dwc1 = new DownloadWebContent();
-        dwc1.execute(strUrl);
-        textView.setText("");
-        busNumer.setText("");
-        busNumer.append("버스번호:");
-        busNumer.append(strSrch + "\n");
-    }
-
-    public void minusBaek(View v) {
-        busNum -= 100;
-        String serviceUrl = "http://ws.bus.go.kr/api/rest/busRouteInfo/getBusRouteList";
-        String serviceKey = "lI0Ngu5M%2BJewHO%2BGcadPtiLVGTc6U4lgwJW8sgKiDLQVZ31N%2BwpXpAiPGoFaJJE0VsqzxAZNruDG8BC3kxkFhQ%3D%3D";
-        strSrch = busNum + "";
-
-        //가져올 정보를 strUrl에 저장함
-        String strUrl = serviceUrl + "?ServiceKey=" + serviceKey + "&strSrch=" + strSrch;
-
-        DownloadWebContent dwc1 = new DownloadWebContent();
-        dwc1.execute(strUrl);
-        textView.setText("");
-        busNumer.setText("");
-        busNumer.append("버스번호:");
-        busNumer.append(strSrch + "\n");
-
-    }
-
-
 }
 
 

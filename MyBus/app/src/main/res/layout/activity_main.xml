@@ -18,35 +18,17 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
+            <EditText
+                android:id="@+id/searchNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="Bus number"/>
+
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="resetCurrentBus"
-                android:text="Reset"/>
-
-            <Button
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:onClick="plusBusNumber"
-                android:text="+1"/>
-
-            <Button
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:onClick="minusBusNumber"
-                android:text="-1"/>
-
-            <Button
-                android:layout_width="90dp"
-                android:layout_height="wrap_content"
-                android:onClick="plusBaek"
-                android:text="+100"/>
-
-            <Button
-                android:layout_width="90dp"
-                android:layout_height="wrap_content"
-                android:onClick="minusBaek"
-                android:text="-100"/>
+                android:onClick="searchBusNumber"
+                android:text="Search"/>
 
         </LinearLayout>
 
