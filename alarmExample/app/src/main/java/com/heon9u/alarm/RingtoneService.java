@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -18,6 +19,8 @@ public class RingtoneService extends Service{
     MediaPlayer mediaPlayer;
     int startId;
     boolean isRunning;
+    PowerManager powerManager;
+    PowerManager.WakeLock wakeLock;
 
     @Nullable
     @Override
@@ -28,8 +31,14 @@ public class RingtoneService extends Service{
     @Override
     public void onCreate() {
         super.onCreate();
+        powerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK |
+                PowerManager.ACQUIRE_CAUSES_WAKEUP |
+                PowerManager.ON_AFTER_RELEASE),
+                "app:myWake_tag");
 
         if (Build.VERSION.SDK_INT >= 26) {
+            wakeLock.acquire();
             String CHANNEL_ID = "default";
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
                     "Channel human readable title",
@@ -50,7 +59,7 @@ public class RingtoneService extends Service{
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
+        wakeLock.acquire();
         String getState = intent.getExtras().getString("state");
         System.out.println(getState);
 
@@ -84,7 +93,6 @@ public class RingtoneService extends Service{
             mediaPlayer.stop();
             mediaPlayer.reset();
             mediaPlayer.release();
-
             this.isRunning = false;
             this.startId = 0;
         }
@@ -112,8 +120,7 @@ public class RingtoneService extends Service{
     @Override
     public void onDestroy() {
         super.onDestroy();
-
+        wakeLock.release();
         Log.d("onDestory() 실행", "서비스 파괴");
-
     }
 }
