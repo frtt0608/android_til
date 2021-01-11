@@ -2,7 +2,11 @@ package com.heon9u.alarm;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -48,6 +52,12 @@ public class MainActivity extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View v) {
+
+                NotificationManager manager= (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+                NotificationCompat.Builder builder= new NotificationCompat.Builder(context);
+                builder.setSmallIcon(android.R.drawable.ic_dialog_email);
+                Notification notification= builder.build();
+                manager.notify(1, notification);
 
                 // calendar에 시간 셋팅
                 calendar.set(Calendar.HOUR_OF_DAY, alarm_timepicker.getHour());
