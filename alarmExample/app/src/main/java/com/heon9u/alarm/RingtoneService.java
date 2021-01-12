@@ -38,7 +38,6 @@ public class RingtoneService extends Service{
                 "app:myWake_tag");
 
         if (Build.VERSION.SDK_INT >= 26) {
-            wakeLock.acquire();
             String CHANNEL_ID = "default";
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
                     "Channel human readable title",
@@ -48,7 +47,6 @@ public class RingtoneService extends Service{
 
             Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setSmallIcon(R.mipmap.ic_launcher)
-
                     .build();
 
             startForeground(1, notification);
@@ -118,7 +116,6 @@ public class RingtoneService extends Service{
     @Override
     public void onDestroy() {
         super.onDestroy();
-        wakeLock.release();
         Log.d("onDestory() 실행", "서비스 파괴");
     }
 }
