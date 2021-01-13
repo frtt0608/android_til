@@ -64,6 +64,9 @@ public class RingtoneService extends Service{
         switch (getState) {
             case "alarm on":
                 startId = 1;
+                Intent onIntent = new Intent(this, OnAlarm.class);
+                onIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(onIntent);
                 break;
             case "alarm off":
                 startId = 0;
@@ -110,6 +113,7 @@ public class RingtoneService extends Service{
 
         else {
         }
+
         return START_NOT_STICKY;
     }
 

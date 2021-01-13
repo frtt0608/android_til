@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     Context context;
     PendingIntent pendingIntent;
     long curTime;
+    Intent my_intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         final Calendar calendar = Calendar.getInstance();
         curTime = calendar.getTimeInMillis();
         // 알람리시버 intent 생성
-        final Intent my_intent = new Intent(this.context, AlarmReceiver.class);
+        my_intent = new Intent(this.context, AlarmReceiver.class);
 
         // 알람 시작 버튼
         Button alarm_on = findViewById(R.id.btn_start);
@@ -99,14 +100,18 @@ public class MainActivity extends AppCompatActivity {
         alarm_off.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this,"Alarm 종료",Toast.LENGTH_SHORT).show();
-                // 알람매니저 취소
-                alarm_manager.cancel(pendingIntent);
-                my_intent.putExtra("state","alarm off");
-                remainTime.setText("남은시간 00:00");
-                // 알람취소
-                sendBroadcast(my_intent);
+                cancel();
             }
         });
+    }
+
+    public void cancel() {
+        Toast.makeText(MainActivity.this,"Alarm 종료",Toast.LENGTH_SHORT).show();
+        // 알람매니저 취소
+        alarm_manager.cancel(pendingIntent);
+        my_intent.putExtra("state","alarm off");
+        remainTime.setText("남은시간 00:00");
+        // 알람취소
+        sendBroadcast(my_intent);
     }
 }
