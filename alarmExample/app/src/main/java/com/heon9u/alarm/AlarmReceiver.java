@@ -11,7 +11,8 @@ public class AlarmReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
 
         this.context = context;
-
+        String state = intent.getStringExtra("state");
+        System.out.println(state);
         // RingtonePlayingService 서비스 intent 생성
         Intent service_intent = new Intent(context, RingtoneService.class);
 
