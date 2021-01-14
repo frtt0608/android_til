@@ -3,6 +3,7 @@ package com.heon9u.alarm;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -90,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                 pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, my_intent,
                         PendingIntent.FLAG_UPDATE_CURRENT);
                 // 알람셋팅
-                alarm_manager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                alarm_manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
                         pendingIntent);
             }
         });
@@ -106,12 +107,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void cancel() {
-        Toast.makeText(MainActivity.this,"Alarm 종료",Toast.LENGTH_SHORT).show();
-        // 알람매니저 취소
-        alarm_manager.cancel(pendingIntent);
-        my_intent.putExtra("state","alarm off");
-        remainTime.setText("남은시간 00:00");
-        // 알람취소
-        sendBroadcast(my_intent);
+
+        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, my_intent,
+                PendingIntent.FLAG_NO_CREATE);
+
+        if(pendingIntent == null) {
+            System.out.println("no alarm");
+        } else {
+
+            pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, my_intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+            alarm_manager.cancel(pendingIntent);
+            pendingIntent.cancel();
+
+            my_intent.putExtra("state","alarm off");
+            System.out.println("cancel alarm");
+            listAlarms();
+            // 알람취소
+            sendBroadcast(my_intent);
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void listAlarms() {
+        System.out.println("alarm list: ");
+        for (AlarmManager.AlarmClockInfo aci = alarm_manager.getNextAlarmClock();
+             aci != null;
+             aci = alarm_manager.getNextAlarmClock()) {
+                System.out.println(aci.getTriggerTime());
+                remainTime.setText(Long.toString(aci.getTriggerTime()));
+        }
     }
 }
