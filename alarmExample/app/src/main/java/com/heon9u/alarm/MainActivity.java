@@ -8,8 +8,13 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -18,15 +23,20 @@ import android.widget.Toast;
 
 import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    TextView remainTime;
+    TextView remainTime, ringtone;
     AlarmManager alarm_manager;
     TimePicker alarm_timepicker;
     Context context;
     PendingIntent pendingIntent;
     long curTime;
     Intent my_intent;
+    Button select, alarm_off;
+    final int REQUESTCODE_RINGTONE_PICKER = 1000;
+    String ringtoneUri;
+    MediaPlayer mediaPlayer;
+    Uri ring;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +59,13 @@ public class MainActivity extends AppCompatActivity {
 
         // 알람 시작 버튼
         Button alarm_on = findViewById(R.id.btn_start);
+        alarm_off = findViewById(R.id.btn_finish);
+        select = findViewById(R.id.select);
+        alarm_off.setOnClickListener(this);
+        select.setOnClickListener(this);
+
         remainTime = findViewById(R.id.remainTime);
+        ringtone = findViewById(R.id.ringtone);
         remainTime.setText("남은시간 00:00");
 
         alarm_on.setOnClickListener(new View.OnClickListener() {
@@ -75,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                     diff += 24*60*60;
                 }
 
-                System.out.println(diff);
+                System.out.println("남은시간은: " + diff + "초 입니다.");
                 int diffHour = (int) diff/(60*60);
                 int diffMin = (int) (diff/60)%60;
 
@@ -96,14 +112,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // 알람 정지 버튼
-        Button alarm_off = findViewById(R.id.btn_finish);
-        alarm_off.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                cancel();
-            }
-        });
     }
 
     public void cancel() {
@@ -137,5 +145,67 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println(aci.getTriggerTime());
                 remainTime.setText(Long.toString(aci.getTriggerTime()));
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+
+        switch (v.getId()) {
+            case R.id.btn_finish:
+                cancel();
+                ringtone.setText("없음");
+                releaseRingtone();
+                break;
+
+            case R.id.select:
+                showRingtoneChooser();
+                break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if( requestCode == REQUESTCODE_RINGTONE_PICKER ) {
+            if (resultCode == RESULT_OK) {
+                // -- 알림음 재생하는 코드 -- //
+                ring = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+                if (ring != null) {
+                    ringtoneUri = ring.toString();
+                    ringtone.setText( ring.toString() );
+                    my_intent.putExtra("uri", ring);
+//                    this.startRingtone( ring );
+                } else {
+                    ringtoneUri = null;
+                    ringtone.setText( "Choose ringtone" );
+                }
+            }
+        }
+    }
+
+    private void releaseRingtone() {
+        if( mediaPlayer != null ) {
+            if( mediaPlayer.isPlaying() ) {
+                mediaPlayer.stop();
+            }
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+    }
+
+    public void showRingtoneChooser() {
+        Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Choose Ringtone!" );
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALL);
+
+        //-- 알림 선택창이 떴을 때, 기본값으로 선택되어질 ringtone설정
+         if( ringtoneUri != null && ringtoneUri.isEmpty() ) {
+             intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI,
+                     Uri.parse(ringtoneUri));
+         }
+
+         this.startActivityForResult( intent, REQUESTCODE_RINGTONE_PICKER );
     }
 }

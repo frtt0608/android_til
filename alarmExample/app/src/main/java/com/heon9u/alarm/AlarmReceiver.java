@@ -3,6 +3,7 @@ package com.heon9u.alarm;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 
 public class AlarmReceiver extends BroadcastReceiver {
     Context context;
@@ -12,12 +13,15 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         this.context = context;
         String state = intent.getStringExtra("state");
-        System.out.println(state);
+        System.out.println("Receiver: " + state);
+
         // RingtonePlayingService 서비스 intent 생성
         Intent service_intent = new Intent(context, RingtoneService.class);
+        Uri ring = intent.getParcelableExtra("uri");
 
         // RingtonePlayinService로 extra string값 보내기
         service_intent.putExtra("state", intent.getExtras().getString("state"));
+        service_intent.putExtra("ring", ring);
 
         // start the ringtone service
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){

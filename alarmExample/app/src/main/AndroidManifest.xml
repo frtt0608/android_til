@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name = "android.permission.VIBRATE"/>
 
     <application
         android:allowBackup="true"
@@ -26,7 +28,8 @@
         <receiver android:name=".AlarmReceiver"/>
         <service
             android:name=".RingtoneService"
-            android:enabled="true"></service>
+            android:enabled="true"
+            android:permission="android.permission.SYSTEM_ALERT_WINDOW"></service>
 
     </application>
 </manifest>
