@@ -13,9 +13,12 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 public class RingtoneService extends Service {
     MediaPlayer mediaPlayer;
@@ -24,6 +27,8 @@ public class RingtoneService extends Service {
     PowerManager powerManager;
     PowerManager.WakeLock wakeLock;
     Uri ring;
+    String state;
+    NotificationManagerCompat notificationManagerCompat;
 
     @Nullable
     @Override
@@ -35,6 +40,8 @@ public class RingtoneService extends Service {
     public void onCreate() {
         super.onCreate();
 
+        System.out.println("Service 접근");
+
         powerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK |
                 PowerManager.ACQUIRE_CAUSES_WAKEUP |
@@ -43,19 +50,24 @@ public class RingtoneService extends Service {
 
         if (Build.VERSION.SDK_INT >= 26) {
             String CHANNEL_ID = "default";
+
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
                     "Channel human readable title",
                     NotificationManager.IMPORTANCE_DEFAULT);
 
             ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
 
-            Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setSmallIcon(R.mipmap.ic_launcher)
-                    .build();
+                    .setContentTitle("Alarm Noti")
+                    .setContentText("content Text")
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setAutoCancel(true);
 
-            startForeground(1, notification);
+            notificationManagerCompat = NotificationManagerCompat.from(this);
+
+            startForeground(1, builder.build());
         }
-
     }
 
     private void startRingtone( Uri uriRingtone ) {
@@ -87,31 +99,26 @@ public class RingtoneService extends Service {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        String getState = intent.getExtras().getString("state");
-        System.out.println("Service: " + getState);
+        state = intent.getExtras().getString("state");
+        System.out.println("Service: " + state);
         ring = intent.getParcelableExtra("ring");
 
-        assert getState != null;
-        switch (getState) {
+        switch (state) {
             case "alarm on":
                 startId = 1;
 //                wakeLock.acquire();
-
-                startRingtone(ring);
+//                startRingtone(ring);
+                Toast.makeText(this, "alarm~", Toast.LENGTH_LONG).show();
 //                Intent onIntent = new Intent(this, OnAlarm.class);
 //                onIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //                startActivity(onIntent);
                 break;
             case "alarm off":
                 startId = 0;
-                releaseRingtone();
-//                wakeLock.release();
-                break;
-            default:
-                startId = 0;
+//                onDestroy();
                 break;
         }
 
@@ -157,9 +164,13 @@ public class RingtoneService extends Service {
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d("onDestory() 실행", "서비스 파괴");
+//        releaseRingtone();
+//        notificationManagerCompat.cancelAll();
+//        wakeLock.release();
     }
 }

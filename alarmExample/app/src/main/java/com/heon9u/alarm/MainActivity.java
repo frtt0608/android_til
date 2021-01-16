@@ -37,12 +37,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String ringtoneUri;
     MediaPlayer mediaPlayer;
     Uri ring;
+    int recode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        recode = 0;
         this.context = this;
 
         // 알람매니저 설정
@@ -72,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View v) {
-
+                recode++;
                 // 시간 가져옴
                 int hour = alarm_timepicker.getHour();
                 int minute = alarm_timepicker.getMinute();
@@ -81,17 +82,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 calendar.set(Calendar.HOUR_OF_DAY, hour);
                 calendar.set(Calendar.MINUTE, minute);
                 calendar.set(Calendar.SECOND, 0);
+                long cur = calendar.getTimeInMillis();
 
-                long diff = (calendar.getTimeInMillis() - curTime)/1000;
+                long diff = (cur - curTime)/1000;
                 if(diff < 0) {
-                    int today = calendar.get(Calendar.DAY_OF_WEEK) + 1;
-                    if(today == 8) today = 1;
-
-                    calendar.set(Calendar.DAY_OF_WEEK, today);
-                    diff += 24*60*60;
+                    cur += 24*60*60*1000;
+                    calendar.setTimeInMillis(cur);
                 }
 
-                System.out.println("남은시간은: " + diff + "초 입니다.");
+                System.out.println("남은시간은: " + (cur-curTime)/1000 + "초 입니다.");
                 int diffHour = (int) diff/(60*60);
                 int diffMin = (int) (diff/60)%60;
 
@@ -104,11 +103,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 // reveiver에 string 값 넘겨주기
                 my_intent.putExtra("state","alarm on");
-                pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, my_intent,
+                pendingIntent = PendingIntent.getBroadcast(MainActivity.this, recode, my_intent,
                         PendingIntent.FLAG_UPDATE_CURRENT);
                 // 알람셋팅
                 alarm_manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
                         pendingIntent);
+
+
             }
         });
 
@@ -116,14 +117,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void cancel() {
 
-        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, my_intent,
+        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, recode, my_intent,
                 PendingIntent.FLAG_NO_CREATE);
 
         if(pendingIntent == null) {
             System.out.println("no alarm");
         } else {
 
-            pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, my_intent,
+            pendingIntent = PendingIntent.getBroadcast(MainActivity.this, recode, my_intent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
             alarm_manager.cancel(pendingIntent);
             pendingIntent.cancel();
@@ -131,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             my_intent.putExtra("state","alarm off");
             System.out.println("cancel alarm");
             listAlarms();
+            recode--;
             // 알람취소
             sendBroadcast(my_intent);
         }
@@ -198,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Choose Ringtone!" );
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
-        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALL);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
 
         //-- 알림 선택창이 떴을 때, 기본값으로 선택되어질 ringtone설정
          if( ringtoneUri != null && ringtoneUri.isEmpty() ) {
