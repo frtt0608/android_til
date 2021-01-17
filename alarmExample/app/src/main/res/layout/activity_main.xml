@@ -25,7 +25,7 @@
             android:id="@+id/remainTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="time"
+            android:text="남은시간 00:00"
             android:textSize="20dp"/>
 
     </LinearLayout>

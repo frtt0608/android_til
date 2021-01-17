@@ -46,58 +46,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recode = 0;
         this.context = this;
 
-        // 알람매니저 설정
         alarm_manager = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-        // 타임피커 설정
         alarm_timepicker = findViewById(R.id.time_picker);
 
-        // Calendar 객체 생성
-        final Calendar calendar = Calendar.getInstance();
-        curTime = calendar.getTimeInMillis();
-        // 알람리시버 intent 생성
+        Calendar calendar = Calendar.getInstance();
         my_intent = new Intent(this.context, AlarmReceiver.class);
 
         // 알람 시작 버튼
         Button alarm_on = findViewById(R.id.btn_start);
         alarm_off = findViewById(R.id.btn_finish);
-        select = findViewById(R.id.select);
         alarm_off.setOnClickListener(this);
+        select = findViewById(R.id.select);
         select.setOnClickListener(this);
 
         remainTime = findViewById(R.id.remainTime);
         ringtone = findViewById(R.id.ringtone);
-        remainTime.setText("남은시간 00:00");
 
         alarm_on.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View v) {
-                recode++;
                 // 시간 가져옴
                 int hour = alarm_timepicker.getHour();
                 int minute = alarm_timepicker.getMinute();
 
-                // calendar에 시간 셋팅
-                calendar.set(Calendar.HOUR_OF_DAY, hour);
-                calendar.set(Calendar.MINUTE, minute);
-                calendar.set(Calendar.SECOND, 0);
-                long cur = calendar.getTimeInMillis();
-
-                long diff = (cur - curTime)/1000;
-                if(diff < 0) {
-                    cur += 24*60*60*1000;
-                    calendar.setTimeInMillis(cur);
-                }
-
-                System.out.println("남은시간은: " + (cur-curTime)/1000 + "초 입니다.");
-                int diffHour = (int) diff/(60*60);
-                int diffMin = (int) (diff/60)%60;
-
-                remainTime.setText("남은시간은 " +
-                        Integer.toString(diffHour) +
-                        ":" +
-                        Integer.toString(diffMin) + "입니다.");
+//                // calendar에 시간 셋팅
+//                calendar.set(Calendar.HOUR_OF_DAY, hour);
+//                calendar.set(Calendar.MINUTE, minute);
+//                calendar.set(Calendar.SECOND, 0);
+//                long cur = calendar.getTimeInMillis();
+//
+//                long diff = (cur - curTime)/1000;
+//                if(diff < 0) {
+//                    cur += 24*60*60*1000;
+//                    calendar.setTimeInMillis(cur);
+//                }
+//
+//                System.out.println("남은시간은: " + (cur-curTime)/1000 + "초 입니다.");
+//                int diffHour = (int) diff/(60*60);
+//                int diffMin = (int) (diff/60)%60;
+//
+//                remainTime.setText("남은시간은 " +
+//                        Integer.toString(diffHour) +
+//                        ":" +
+//                        Integer.toString(diffMin) + "입니다.");
 
                 Toast.makeText(MainActivity.this,"Alarm 예정 " + hour + "시 " + minute + "분",Toast.LENGTH_SHORT).show();
 
@@ -106,10 +98,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 pendingIntent = PendingIntent.getBroadcast(MainActivity.this, recode, my_intent,
                         PendingIntent.FLAG_UPDATE_CURRENT);
                 // 알람셋팅
-                alarm_manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                System.out.println("알람 등록");
+                alarm_manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                        System.currentTimeMillis() + 6500,
                         pendingIntent);
-
-
             }
         });
 
@@ -131,8 +123,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             my_intent.putExtra("state","alarm off");
             System.out.println("cancel alarm");
-            listAlarms();
-            recode--;
+//            listAlarms();
             // 알람취소
             sendBroadcast(my_intent);
         }
@@ -155,7 +146,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.btn_finish:
                 cancel();
-                ringtone.setText("없음");
                 releaseRingtone();
                 break;
 
@@ -176,7 +166,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     ringtoneUri = ring.toString();
                     ringtone.setText( ring.toString() );
                     my_intent.putExtra("uri", ring);
-//                    this.startRingtone( ring );
                 } else {
                     ringtoneUri = null;
                     ringtone.setText( "Choose ringtone" );

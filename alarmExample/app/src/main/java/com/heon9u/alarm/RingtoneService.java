@@ -29,6 +29,7 @@ public class RingtoneService extends Service {
     Uri ring;
     String state;
     NotificationManagerCompat notificationManagerCompat;
+    NotificationCompat.Builder builder;
 
     @Nullable
     @Override
@@ -39,25 +40,20 @@ public class RingtoneService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
         System.out.println("Service 접근");
 
-        powerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK |
-                PowerManager.ACQUIRE_CAUSES_WAKEUP |
-                PowerManager.ON_AFTER_RELEASE),
-                "app:myWake_tag");
+        registerWakeLock();
 
         if (Build.VERSION.SDK_INT >= 26) {
-            String CHANNEL_ID = "default";
 
+            String CHANNEL_ID = "default";
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
                     "Channel human readable title",
                     NotificationManager.IMPORTANCE_DEFAULT);
 
             ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+            builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentTitle("Alarm Noti")
                     .setContentText("content Text")
@@ -65,9 +61,15 @@ public class RingtoneService extends Service {
                     .setAutoCancel(true);
 
             notificationManagerCompat = NotificationManagerCompat.from(this);
-
-            startForeground(1, builder.build());
         }
+    }
+
+    private void registerWakeLock() {
+        powerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK |
+                        PowerManager.ACQUIRE_CAUSES_WAKEUP |
+                        PowerManager.ON_AFTER_RELEASE),
+                "app:myWake_tag");
     }
 
     private void startRingtone( Uri uriRingtone ) {
@@ -80,10 +82,9 @@ public class RingtoneService extends Service {
             }
             // STREAM_VOICE_CALL, STREAM_SYSTEM, STREAM_RING, STREAM_MUSIC, STREAM_ALARM
             // STREAM_NOTIFICATION, STREAM_DTMF
-//            mediaPlayer.setAudioStreamType( AudioManager.STREAM_ALARM );
             mediaPlayer.setAudioStreamType( AudioManager.STREAM_MUSIC );
-//            mediaPlayer.setAudioAttributes();
             mediaPlayer.start();
+            System.out.println(uriRingtone.toString());
         } catch( Exception e ) {
             e.printStackTrace();
         }
@@ -102,62 +103,20 @@ public class RingtoneService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        startForeground(1, builder.build());
         state = intent.getExtras().getString("state");
         System.out.println("Service: " + state);
         ring = intent.getParcelableExtra("ring");
 
         switch (state) {
             case "alarm on":
-                startId = 1;
-//                wakeLock.acquire();
-//                startRingtone(ring);
                 Toast.makeText(this, "alarm~", Toast.LENGTH_LONG).show();
-//                Intent onIntent = new Intent(this, OnAlarm.class);
-//                onIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                startActivity(onIntent);
+                wakeLock.acquire();
+                startRingtone(ring);
                 break;
             case "alarm off":
-                startId = 0;
-//                onDestroy();
+                onDestroy();
                 break;
-        }
-
-        // 알람음 재생 X , 알람음 시작 클릭
-        if(!this.isRunning && startId == 1) {
-
-//            mediaPlayer = MediaPlayer.create(this, R.raw.dudu);
-//            mediaPlayer.start();
-
-            this.isRunning = true;
-            this.startId = 0;
-        }
-
-        // 알람음 재생 O , 알람음 종료 버튼 클릭
-        else if(this.isRunning && startId == 0) {
-
-//            mediaPlayer.stop();
-//            mediaPlayer.reset();
-//            mediaPlayer.release();
-            this.isRunning = false;
-            this.startId = 0;
-        }
-
-        // 알람음 재생 X , 알람음 종료 버튼 클릭
-        else if(!this.isRunning && startId == 0) {
-
-            this.isRunning = false;
-            this.startId = 0;
-
-        }
-
-        // 알람음 재생 O , 알람음 시작 버튼 클릭
-        else if(this.isRunning && startId == 1){
-
-            this.isRunning = true;
-            this.startId = 1;
-        }
-
-        else {
         }
 
         return START_NOT_STICKY;
@@ -169,8 +128,8 @@ public class RingtoneService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.d("onDestory() 실행", "서비스 파괴");
-//        releaseRingtone();
-//        notificationManagerCompat.cancelAll();
-//        wakeLock.release();
+        stopForeground(true);
+        releaseRingtone();
+        wakeLock.release();
     }
 }
