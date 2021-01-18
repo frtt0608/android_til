@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     PendingIntent pendingIntent;
     long curTime;
     Intent my_intent;
-    Button select, alarm_off;
+    Button select, alarm_off, check;
     final int REQUESTCODE_RINGTONE_PICKER = 1000;
     String ringtoneUri;
     MediaPlayer mediaPlayer;
@@ -58,9 +58,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         alarm_off.setOnClickListener(this);
         select = findViewById(R.id.select);
         select.setOnClickListener(this);
+        check = findViewById(R.id.check);
+        check.setOnClickListener(this);
 
         remainTime = findViewById(R.id.remainTime);
         ringtone = findViewById(R.id.ringtone);
+
+        Uri tempRing = Uri.parse("content://media/external_primary/audio/media/60?title=Variations&canonical=1");
+        ringtone.setText( tempRing.toString() );
+        my_intent.putExtra("uri", tempRing);
 
         alarm_on.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.M)
@@ -107,6 +113,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    public void checkAlarm() {
+        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, recode, my_intent,
+                PendingIntent.FLAG_NO_CREATE);
+
+        if(pendingIntent == null) {
+            System.out.println("현재 알람은 없습니다.");
+        } else {
+            System.out.println("등록된 알람이 있습니다.");
+        }
+    }
+
     public void cancel() {
 
         pendingIntent = PendingIntent.getBroadcast(MainActivity.this, recode, my_intent,
@@ -114,8 +131,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if(pendingIntent == null) {
             System.out.println("no alarm");
-        } else {
 
+        } else {
             pendingIntent = PendingIntent.getBroadcast(MainActivity.this, recode, my_intent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
             alarm_manager.cancel(pendingIntent);
@@ -123,20 +140,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             my_intent.putExtra("state","alarm off");
             System.out.println("cancel alarm");
-//            listAlarms();
-            // 알람취소
             sendBroadcast(my_intent);
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void listAlarms() {
-        System.out.println("alarm list: ");
-        for (AlarmManager.AlarmClockInfo aci = alarm_manager.getNextAlarmClock();
-             aci != null;
-             aci = alarm_manager.getNextAlarmClock()) {
-                System.out.println(aci.getTriggerTime());
-                remainTime.setText(Long.toString(aci.getTriggerTime()));
         }
     }
 
@@ -152,7 +156,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.select:
                 showRingtoneChooser();
                 break;
+
+            case R.id.check:
+                checkAlarm();
+                break;
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("MainActivity", "State: on Resume");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("MainActivity", "State: on Destroy");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("MainActivity", "State: on Pause");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("MainActivity", "State: on Stop");
     }
 
     @Override

@@ -75,19 +75,21 @@ public class RingtoneService extends Service {
     private void startRingtone( Uri uriRingtone ) {
         this.releaseRingtone();
 
-        try {
-            mediaPlayer = MediaPlayer.create(getApplicationContext(), uriRingtone );
-            if( mediaPlayer == null ) {
-                throw new Exception( "Can't create player" );
+        new Thread(() -> {
+            try {
+                mediaPlayer = MediaPlayer.create(getApplicationContext(), uriRingtone);
+                if (mediaPlayer == null) {
+                    throw new Exception("Can't create player");
+                }
+                // STREAM_VOICE_CALL, STREAM_SYSTEM, STREAM_RING, STREAM_MUSIC, STREAM_ALARM
+                // STREAM_NOTIFICATION, STREAM_DTMF
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mediaPlayer.start();
+                System.out.println(uriRingtone.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            // STREAM_VOICE_CALL, STREAM_SYSTEM, STREAM_RING, STREAM_MUSIC, STREAM_ALARM
-            // STREAM_NOTIFICATION, STREAM_DTMF
-            mediaPlayer.setAudioStreamType( AudioManager.STREAM_MUSIC );
-            mediaPlayer.start();
-            System.out.println(uriRingtone.toString());
-        } catch( Exception e ) {
-            e.printStackTrace();
-        }
+        }).start();
     }
 
     private void releaseRingtone() {
@@ -105,31 +107,75 @@ public class RingtoneService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         startForeground(1, builder.build());
         state = intent.getExtras().getString("state");
-        System.out.println("Service: " + state);
         ring = intent.getParcelableExtra("ring");
+
+
+        System.out.println("Service: " + state);
+
+        assert state != null;
 
         switch (state) {
             case "alarm on":
-                Toast.makeText(this, "alarm~", Toast.LENGTH_LONG).show();
+                startId = 1;
+                Toast.makeText(this, "~~~alarm~~~", Toast.LENGTH_LONG).show();
+//                onPage();
+//                startRingtone(ring);
                 wakeLock.acquire();
-                startRingtone(ring);
                 break;
             case "alarm off":
-                onDestroy();
+            default:
+                startId = 0;
+//                onDestroy();
                 break;
         }
+
+        if(!this.isRunning && startId == 1) {
+            mediaPlayer = MediaPlayer.create(getApplicationContext(), ring);
+            mediaPlayer.start();
+            System.out.println(ring.toString());
+
+            isRunning = true;
+            this.startId = 0;
+        }
+        else if(isRunning && startId == 0) {
+            mediaPlayer.stop();
+            mediaPlayer.reset();
+            mediaPlayer.release();
+
+            isRunning = false;
+            this.startId = 0;
+        }
+        else if(!this.isRunning && startId == 0) {
+            this.isRunning = false;
+            this.startId = 0;
+        }
+        else if(this.isRunning && startId == 1) {
+            this.isRunning = true;
+            this.startId = 1;
+        }
+
+        Intent onIntent = new Intent(this, OnAlarm.class);
+        onIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(onIntent);
 
         return START_NOT_STICKY;
     }
 
+//    public void onPage() {
+//        if(state.equals("alarm on")) {
+//            Intent onIntent = new Intent(this, OnAlarm.class);
+//            onIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+//            startActivity(onIntent);
+//        }
+//    }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d("onDestory() 실행", "서비스 파괴");
+        Log.d("on Destroy() 실행", "서비스 파괴");
         stopForeground(true);
-        releaseRingtone();
-        wakeLock.release();
+//        releaseRingtone();
+//        wakeLock.release();
     }
 }
