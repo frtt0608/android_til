@@ -3,17 +3,16 @@ package com.heon9u.alarm;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -43,6 +42,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        checkPermission();
+
         recode = 0;
         this.context = this;
 
@@ -187,6 +189,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d("MainActivity", "State: on Stop");
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -203,6 +206,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     ringtone.setText( "Choose ringtone" );
                 }
             }
+        } else if(requestCode == 1) {
+            if (!Settings.canDrawOverlays(this)) {
+                // 허용 못했을 경우 처리
+            } else {
+                startService(new Intent(MainActivity.this, RingtoneService.class));
+            }
+        }
+    }
+
+    public void checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {   // 마시멜로우 이상일 경우
+            if (!Settings.canDrawOverlays(this)) {              // 체크
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, 1);
+            } else {
+                startService(new Intent(MainActivity.this, RingtoneService.class));
+            }
+        } else {
+            startService(new Intent(MainActivity.this, RingtoneService.class));
         }
     }
 

@@ -27,25 +27,10 @@ public class AlarmReceiver extends BroadcastReceiver {
         // start the ringtone service
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){
             System.out.println("startForegroundService");
-//            onPage();
             context.startForegroundService(service_intent);
         }else{
             System.out.println("startService");
             context.startService(service_intent);
         }
-    }
-
-    public void onPage() {
-        new Thread(() -> {
-            try {
-                if(state.equals("alarm on")) {
-                    Intent onIntent = new Intent(context, OnAlarm.class);
-                    onIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(onIntent);
-                }
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-        }).start();
     }
 }

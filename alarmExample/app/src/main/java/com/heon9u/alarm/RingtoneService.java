@@ -4,8 +4,10 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -21,11 +23,10 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 public class RingtoneService extends Service {
+
     MediaPlayer mediaPlayer;
     int startId;
     boolean isRunning;
-    PowerManager powerManager;
-    PowerManager.WakeLock wakeLock;
     Uri ring;
     String state;
     NotificationManagerCompat notificationManagerCompat;
@@ -41,8 +42,6 @@ public class RingtoneService extends Service {
     public void onCreate() {
         super.onCreate();
         System.out.println("Service 접근");
-
-        registerWakeLock();
 
         if (Build.VERSION.SDK_INT >= 26) {
 
@@ -64,13 +63,7 @@ public class RingtoneService extends Service {
         }
     }
 
-    private void registerWakeLock() {
-        powerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK |
-                        PowerManager.ACQUIRE_CAUSES_WAKEUP |
-                        PowerManager.ON_AFTER_RELEASE),
-                "app:myWake_tag");
-    }
+
 
     private void startRingtone( Uri uriRingtone ) {
         this.releaseRingtone();
@@ -105,10 +98,13 @@ public class RingtoneService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        startForeground(1, builder.build());
-        state = intent.getExtras().getString("state");
-        ring = intent.getParcelableExtra("ring");
+        if(intent.getStringExtra("state") == null) {
+            return START_NOT_STICKY;
+        }
 
+        startForeground(1, builder.build());
+        state = intent.getStringExtra("state");
+        ring = intent.getParcelableExtra("ring");
 
         System.out.println("Service: " + state);
 
@@ -120,12 +116,10 @@ public class RingtoneService extends Service {
                 Toast.makeText(this, "~~~alarm~~~", Toast.LENGTH_LONG).show();
 //                onPage();
 //                startRingtone(ring);
-                wakeLock.acquire();
                 break;
             case "alarm off":
             default:
                 startId = 0;
-//                onDestroy();
                 break;
         }
 
@@ -141,6 +135,7 @@ public class RingtoneService extends Service {
             mediaPlayer.stop();
             mediaPlayer.reset();
             mediaPlayer.release();
+            onDestroy();
 
             isRunning = false;
             this.startId = 0;
@@ -154,20 +149,18 @@ public class RingtoneService extends Service {
             this.startId = 1;
         }
 
-        Intent onIntent = new Intent(this, OnAlarm.class);
-        onIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(onIntent);
+        onPage();
 
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
-//    public void onPage() {
-//        if(state.equals("alarm on")) {
-//            Intent onIntent = new Intent(this, OnAlarm.class);
-//            onIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//            startActivity(onIntent);
-//        }
-//    }
+    public void onPage() {
+        if(state.equals("alarm on")) {
+            Intent onIntent = new Intent(this, OnAlarm.class);
+            onIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(onIntent);
+        }
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -176,6 +169,5 @@ public class RingtoneService extends Service {
         Log.d("on Destroy() 실행", "서비스 파괴");
         stopForeground(true);
 //        releaseRingtone();
-//        wakeLock.release();
     }
 }

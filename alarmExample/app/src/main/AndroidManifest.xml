@@ -25,7 +25,10 @@
             </intent-filter>
         </activity>
         
-        <activity android:name=".OnAlarm"/>
+        <activity android:name=".OnAlarm"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:taskAffinity="com.task.onAlarm"/>
 
         <receiver android:name=".AlarmReceiver"/>
 
@@ -39,7 +42,8 @@
 
         <service
             android:name=".RingtoneService"
-            android:enabled="true"/>
+            android:enabled="true"
+            android:permission="android.permission.SYSTEM_ALERT_WINDOW"/>
 
     </application>
 </manifest>
