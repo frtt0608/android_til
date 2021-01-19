@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Intent my_intent;
     Button select, alarm_off, check;
     final int REQUESTCODE_RINGTONE_PICKER = 1000;
+    final int REQUESTCODE_PERMISSIONS = 1;
     String ringtoneUri;
     MediaPlayer mediaPlayer;
     Uri ring;
@@ -43,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        checkPermission();
+//        checkPermission();
 
         recode = 0;
         this.context = this;
@@ -165,30 +166,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d("MainActivity", "State: on Resume");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d("MainActivity", "State: on Destroy");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d("MainActivity", "State: on Pause");
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d("MainActivity", "State: on Stop");
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -206,27 +183,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     ringtone.setText( "Choose ringtone" );
                 }
             }
-        } else if(requestCode == 1) {
+        } else if(requestCode == REQUESTCODE_PERMISSIONS) {
             if (!Settings.canDrawOverlays(this)) {
                 // 허용 못했을 경우 처리
-            } else {
-                startService(new Intent(MainActivity.this, RingtoneService.class));
+                System.out.println("SYSTEM_ALERT_WINDOW 퍼미션 체크 필요");
             }
         }
     }
 
     public void checkPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {   // 마시멜로우 이상일 경우
-            if (!Settings.canDrawOverlays(this)) {              // 체크
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, 1);
-            } else {
-                startService(new Intent(MainActivity.this, RingtoneService.class));
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {   // 마시멜로우 이상일 경우
+                if (!Settings.canDrawOverlays(this)) {// 체크
+                    Uri uri = Uri.parse("package:" + getPackageName());
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            uri);
+                    startActivityForResult(intent, REQUESTCODE_PERMISSIONS);
+                }
             }
-        } else {
-            startService(new Intent(MainActivity.this, RingtoneService.class));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {   // 마시멜로우 이상일 경우
+//            if (!Settings.canDrawOverlays(this)) {// 체크
+//                Uri uri = Uri.parse("package:" + getPackageName());
+//                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+//                        uri);
+//                startActivityForResult(intent, REQUESTCODE_PERMISSIONS);
+//            } else {
+//                startService(new Intent(MainActivity.this, RingtoneService.class));
+//            }
+//        } else {
+//            startService(new Intent(MainActivity.this, RingtoneService.class));
+//        }
     }
 
     private void releaseRingtone() {

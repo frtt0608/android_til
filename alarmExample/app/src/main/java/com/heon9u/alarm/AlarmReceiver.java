@@ -33,4 +33,15 @@ public class AlarmReceiver extends BroadcastReceiver {
             context.startService(service_intent);
         }
     }
+
+    public void onPage() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Intent onIntent = new Intent(context, OnAlarm.class);
+                onIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(onIntent);
+            }
+        }).start();
+    }
 }

@@ -1,6 +1,9 @@
 package com.heon9u.alarm;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Build;
@@ -16,7 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.Calendar;
 
-public class OnAlarm extends AppCompatActivity {
+public class OnAlarm extends Activity {
 
     Button stop;
     TextView time;
@@ -28,7 +31,6 @@ public class OnAlarm extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.alarm_on);
-
         System.out.println("on Alarm page");
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
@@ -46,10 +48,14 @@ public class OnAlarm extends AppCompatActivity {
         stop.setOnClickListener(view -> {
             Intent serviceIntent = new Intent(this, RingtoneService.class);
             serviceIntent.putExtra("state", "alarm off");
-            startForegroundService(serviceIntent);
+            stopService(serviceIntent);
             wakeLock.release();
             finish();
         });
+    }
+
+    public static boolean isScreenOn(Context context) {
+        return ((PowerManager)context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
     }
 
     private void registerWakeLock() {
@@ -60,3 +66,26 @@ public class OnAlarm extends AppCompatActivity {
                 "app:myWake_tag");
     }
 }
+
+
+//
+//        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+//        // set title
+//        alertDialogBuilder.setTitle("Your Title");
+//        // set dialog message
+//        alertDialogBuilder
+//                .setMessage("Your Message")
+//                .setCancelable(false)
+//                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int id) {
+//                        // if this button is clicked, just close
+//                        // the dialog box and do nothing
+//                        stopService(getIntent());
+//                        dialog.cancel();
+//                        finish();
+//                    }
+//                });
+//        // create alert dialog
+//        AlertDialog alertDialog = alertDialogBuilder.create();
+//        // show it
+//        alertDialog.show();

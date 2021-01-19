@@ -1,20 +1,21 @@
 package com.heon9u.alarm;
 
+import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -29,8 +30,11 @@ public class RingtoneService extends Service {
     boolean isRunning;
     Uri ring;
     String state;
-    NotificationManagerCompat notificationManagerCompat;
-    NotificationCompat.Builder builder;
+    NotificationManager NM;
+    Notification.Builder builder;
+    Notification notifi;
+
+    Dialog dialog;
 
     @Nullable
     @Override
@@ -42,47 +46,35 @@ public class RingtoneService extends Service {
     public void onCreate() {
         super.onCreate();
         System.out.println("Service 접근");
-
-        if (Build.VERSION.SDK_INT >= 26) {
-
-            String CHANNEL_ID = "default";
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                    "Channel human readable title",
-                    NotificationManager.IMPORTANCE_DEFAULT);
-
-            ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
-
-            builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentTitle("Alarm Noti")
-                    .setContentText("content Text")
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .setAutoCancel(true);
-
-            notificationManagerCompat = NotificationManagerCompat.from(this);
-        }
+        setNotification();
     }
 
+    public void setNotification() {
+        if (Build.VERSION.SDK_INT >= 26) {
+            Intent intent = new Intent(this, OnAlarm.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                    intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+            NM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-    private void startRingtone( Uri uriRingtone ) {
-        this.releaseRingtone();
-
-        new Thread(() -> {
-            try {
-                mediaPlayer = MediaPlayer.create(getApplicationContext(), uriRingtone);
-                if (mediaPlayer == null) {
-                    throw new Exception("Can't create player");
-                }
-                // STREAM_VOICE_CALL, STREAM_SYSTEM, STREAM_RING, STREAM_MUSIC, STREAM_ALARM
-                // STREAM_NOTIFICATION, STREAM_DTMF
-                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                mediaPlayer.start();
-                System.out.println(uriRingtone.toString());
-            } catch (Exception e) {
-                e.printStackTrace();
+            if(Build.VERSION.SDK_INT >= 26) {
+                NotificationChannel notificationChannel = new NotificationChannel("channelId",
+                        "channelName", NotificationManager.IMPORTANCE_DEFAULT);
+                NM.createNotificationChannel(notificationChannel);
+                builder = new Notification.Builder(this, "channelId");
+            } else {
+                builder = new Notification.Builder(this);
             }
-        }).start();
+
+            builder.setContentTitle("알람")
+                    .setContentText("Notification + Ringtone + pending(dialog)")
+                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+                    .setTicker("Alarm on!")
+                    .setContentIntent(pendingIntent);
+
+            notifi = builder.build();
+            notifi.flags = Notification.FLAG_AUTO_CANCEL;
+        }
     }
 
     private void releaseRingtone() {
@@ -95,14 +87,22 @@ public class RingtoneService extends Service {
         }
     }
 
+    public void onPage() {
+        Intent onIntent = new Intent(this, OnAlarm.class);
+        onIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(onIntent);
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(intent.getStringExtra("state") == null) {
-            return START_NOT_STICKY;
-        }
+        startForeground(1, notifi);
 
-        startForeground(1, builder.build());
+//        if(intent.getStringExtra("state") == null) {
+//            System.out.println("state is null");
+//            return START_NOT_STICKY;
+//        }
+
         state = intent.getStringExtra("state");
         ring = intent.getParcelableExtra("ring");
 
@@ -114,12 +114,14 @@ public class RingtoneService extends Service {
             case "alarm on":
                 startId = 1;
                 Toast.makeText(this, "~~~alarm~~~", Toast.LENGTH_LONG).show();
+//                onDialog();
 //                onPage();
 //                startRingtone(ring);
                 break;
             case "alarm off":
             default:
                 startId = 0;
+                stopService(intent);
                 break;
         }
 
@@ -135,7 +137,6 @@ public class RingtoneService extends Service {
             mediaPlayer.stop();
             mediaPlayer.reset();
             mediaPlayer.release();
-            onDestroy();
 
             isRunning = false;
             this.startId = 0;
@@ -149,17 +150,7 @@ public class RingtoneService extends Service {
             this.startId = 1;
         }
 
-        onPage();
-
-        return START_STICKY;
-    }
-
-    public void onPage() {
-        if(state.equals("alarm on")) {
-            Intent onIntent = new Intent(this, OnAlarm.class);
-            onIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(onIntent);
-        }
+        return START_NOT_STICKY;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -167,7 +158,7 @@ public class RingtoneService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.d("on Destroy() 실행", "서비스 파괴");
-        stopForeground(true);
-//        releaseRingtone();
+        NM.cancelAll();
+        releaseRingtone();
     }
 }
