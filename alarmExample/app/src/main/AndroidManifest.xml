@@ -17,6 +17,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Alarm">
 
+        <activity android:name=".OnAlarm"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:taskAffinity="com.heon9u.alarm.onAlarm">
+        </activity>
+
+        <activity android:name=".OnDialog"
+            android:theme="@android:style/Theme.Dialog">
+
+        </activity>
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,11 +35,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".OnAlarm"
-            android:excludeFromRecents="true"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:taskAffinity="com.task.onAlarm"/>
 
         <receiver android:name=".AlarmReceiver"/>
 

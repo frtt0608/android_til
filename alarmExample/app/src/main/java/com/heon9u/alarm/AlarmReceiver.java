@@ -18,11 +18,13 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         // RingtonePlayingService 서비스 intent 생성
         Intent service_intent = new Intent(context, RingtoneService.class);
+
         Uri ring = intent.getParcelableExtra("uri");
 
         // RingtonePlayinService로 extra string값 보내기
         service_intent.putExtra("state", intent.getExtras().getString("state"));
         service_intent.putExtra("ring", ring);
+        service_intent.putExtra("volume", intent.getStringExtra("volume"));
 
         // start the ringtone service
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){

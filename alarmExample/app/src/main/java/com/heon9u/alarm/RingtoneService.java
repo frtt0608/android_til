@@ -1,5 +1,6 @@
 package com.heon9u.alarm;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -13,28 +14,25 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 public class RingtoneService extends Service {
 
     MediaPlayer mediaPlayer;
-    int startId;
-    boolean isRunning;
+    PowerManager powerManager;
+    PowerManager.WakeLock wakeLock;
+    int startId, volume;
+    boolean isRunning, screenOn;
     Uri ring;
     String state;
     NotificationManager NM;
     Notification.Builder builder;
     Notification notifi;
-
-    Dialog dialog;
 
     @Nullable
     @Override
@@ -45,8 +43,100 @@ public class RingtoneService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        System.out.println("Service 접근");
+        System.out.println("Service on Create");
+//        setWakeLock();
+//        wakeLock.acquire();
+
         setNotification();
+    }
+
+    private void releaseRingtone() {
+        if( mediaPlayer != null ) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+    }
+
+    public void onPage() {
+        Intent onIntent = new Intent(getApplicationContext(), OnAlarm.class);
+        onIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(onIntent);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        startForeground(1, notifi);
+        state = intent.getStringExtra("state");
+        ring = intent.getParcelableExtra("ring");
+        volume = Integer.parseInt(intent.getStringExtra("volume"));
+
+        System.out.println("Service: " + state);
+
+        assert state != null;
+
+        switch (state) {
+            case "alarm on":
+                startId = 1;
+                Toast.makeText(this, "~~~alarm~~~", Toast.LENGTH_LONG).show();
+                onPage();
+                break;
+            case "alarm off":
+            default:
+                startId = 0;
+                stopService(intent);
+                break;
+        }
+
+        if(!this.isRunning && startId == 1) {
+            AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+            int maxVol = am.getStreamMaxVolume(AudioManager.STREAM_SYSTEM);
+            Log.d("volume", "최대 볼륨: " + maxVol);
+
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, volume,
+                    AudioManager.FLAG_PLAY_SOUND);
+
+
+            mediaPlayer = MediaPlayer.create(getApplicationContext(), ring);
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            int curVol = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+            Log.d("volume", "현재 볼륨: " + curVol);
+            mediaPlayer.start();
+
+            System.out.println(ring.toString());
+
+            isRunning = true;
+            this.startId = 0;
+        }
+        else if(this.isRunning && startId == 0) {
+            mediaPlayer.stop();
+            mediaPlayer.reset();
+            mediaPlayer.release();
+
+            isRunning = false;
+            this.startId = 0;
+        }
+        else if(!this.isRunning && startId == 0) {
+            this.isRunning = false;
+            this.startId = 0;
+        }
+        else if(this.isRunning && startId == 1) {
+            this.isRunning = true;
+            this.startId = 1;
+        }
+
+        return START_NOT_STICKY;
+    }
+
+    private void setWakeLock() {
+        powerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK |
+                        PowerManager.ACQUIRE_CAUSES_WAKEUP |
+                        PowerManager.ON_AFTER_RELEASE),
+                "app:myWake_tag");
+
+        screenOn = powerManager.isScreenOn();
+        System.out.println("현재 화면 상태: " + screenOn);
     }
 
     public void setNotification() {
@@ -70,88 +160,14 @@ public class RingtoneService extends Service {
                     .setContentText("Notification + Ringtone + pending(dialog)")
                     .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setTicker("Alarm on!")
-                    .setContentIntent(pendingIntent);
+                    .setContentIntent(pendingIntent)
+                    .addAction(android.R.drawable.alert_light_frame, "알람 해제하기", pendingIntent);
 
             notifi = builder.build();
             notifi.flags = Notification.FLAG_AUTO_CANCEL;
         }
     }
 
-    private void releaseRingtone() {
-        if( mediaPlayer != null ) {
-            if( mediaPlayer.isPlaying() ) {
-                mediaPlayer.stop();
-            }
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
-    }
-
-    public void onPage() {
-        Intent onIntent = new Intent(this, OnAlarm.class);
-        onIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(onIntent);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        startForeground(1, notifi);
-
-//        if(intent.getStringExtra("state") == null) {
-//            System.out.println("state is null");
-//            return START_NOT_STICKY;
-//        }
-
-        state = intent.getStringExtra("state");
-        ring = intent.getParcelableExtra("ring");
-
-        System.out.println("Service: " + state);
-
-        assert state != null;
-
-        switch (state) {
-            case "alarm on":
-                startId = 1;
-                Toast.makeText(this, "~~~alarm~~~", Toast.LENGTH_LONG).show();
-//                onDialog();
-//                onPage();
-//                startRingtone(ring);
-                break;
-            case "alarm off":
-            default:
-                startId = 0;
-                stopService(intent);
-                break;
-        }
-
-        if(!this.isRunning && startId == 1) {
-            mediaPlayer = MediaPlayer.create(getApplicationContext(), ring);
-            mediaPlayer.start();
-            System.out.println(ring.toString());
-
-            isRunning = true;
-            this.startId = 0;
-        }
-        else if(isRunning && startId == 0) {
-            mediaPlayer.stop();
-            mediaPlayer.reset();
-            mediaPlayer.release();
-
-            isRunning = false;
-            this.startId = 0;
-        }
-        else if(!this.isRunning && startId == 0) {
-            this.isRunning = false;
-            this.startId = 0;
-        }
-        else if(this.isRunning && startId == 1) {
-            this.isRunning = true;
-            this.startId = 1;
-        }
-
-        return START_NOT_STICKY;
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -160,5 +176,11 @@ public class RingtoneService extends Service {
         Log.d("on Destroy() 실행", "서비스 파괴");
         NM.cancelAll();
         releaseRingtone();
+
+//        if(wakeLock != null) {
+//            wakeLock.release();
+//            wakeLock = null;
+//        }
     }
+
 }
