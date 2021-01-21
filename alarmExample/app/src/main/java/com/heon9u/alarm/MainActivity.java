@@ -171,7 +171,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -184,12 +183,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     ringtoneUri = ring.toString();
                     ringtone.setText( ring.toString() );
                     my_intent.putExtra("uri", ring);
+                    decodingUri(ringtoneUri);
                 } else {
                     ringtoneUri = null;
                     ringtone.setText( "Choose ringtone" );
                 }
             }
         }
+    }
+
+    public void decodingUri(String uri) {
+        String uriStr = Uri.decode(uri);
+        Log.d("uri", uriStr);
+        int s = uriStr.indexOf("=") + 1;
+        int e = uriStr.indexOf("&");
+        Log.d("uri", s + "");
+        Log.d("uri", e + "");
+        String subStr = uriStr.substring(s, e);
+        Log.d("subStr", subStr);
     }
 
     public void onAlertDialog() {
@@ -230,12 +241,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALL);
-
-        //-- 알림 선택창이 떴을 때, 기본값으로 선택되어질 ringtone설정
-         if( ringtoneUri != null && ringtoneUri.isEmpty() ) {
-             intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI,
-                     Uri.parse(ringtoneUri));
-         }
 
          this.startActivityForResult( intent, REQUESTCODE_RINGTONE_PICKER );
     }
