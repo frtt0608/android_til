@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Choose Ringtone!" );
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
-        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALL);
 
         //-- 알림 선택창이 떴을 때, 기본값으로 선택되어질 ringtone설정
          if( ringtoneUri != null && ringtoneUri.isEmpty() ) {

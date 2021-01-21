@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -16,6 +17,7 @@ public class BootReceiver extends BroadcastReceiver {
         if(intent.getAction().equals(intent.ACTION_BOOT_COMPLETED)) {
             Intent alarmService = new Intent(context, RingtoneService.class);
             context.startForegroundService(alarmService);
+            Log.d("BootReceiver", "reset");
         }
     }
 }

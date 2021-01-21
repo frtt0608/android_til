@@ -1,7 +1,5 @@
 package com.heon9u.alarm;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -90,12 +88,10 @@ public class RingtoneService extends Service {
 
         if(!this.isRunning && startId == 1) {
             AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-            int maxVol = am.getStreamMaxVolume(AudioManager.STREAM_SYSTEM);
-            Log.d("volume", "최대 볼륨: " + maxVol);
+            int maxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 
-            am.setStreamVolume(AudioManager.STREAM_MUSIC, volume,
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, maxVol*volume/100,
                     AudioManager.FLAG_PLAY_SOUND);
-
 
             mediaPlayer = MediaPlayer.create(getApplicationContext(), ring);
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -184,3 +180,4 @@ public class RingtoneService extends Service {
     }
 
 }
+
