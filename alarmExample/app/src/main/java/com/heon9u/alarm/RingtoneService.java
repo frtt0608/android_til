@@ -50,6 +50,7 @@ public class RingtoneService extends Service {
 
     private void releaseRingtone() {
         if( mediaPlayer != null ) {
+            mediaPlayer.stop();
             mediaPlayer.release();
             mediaPlayer = null;
         }
@@ -89,17 +90,15 @@ public class RingtoneService extends Service {
         if(!this.isRunning && startId == 1) {
             AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
             int maxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+            System.out.println(ring.toString());
 
             am.setStreamVolume(AudioManager.STREAM_MUSIC, maxVol*volume/100,
                     AudioManager.FLAG_PLAY_SOUND);
 
-            mediaPlayer = MediaPlayer.create(getApplicationContext(), ring);
+            mediaPlayer = new MediaPlayer();
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            int curVol = am.getStreamVolume(AudioManager.STREAM_MUSIC);
-            Log.d("volume", "현재 볼륨: " + curVol);
+            mediaPlayer = MediaPlayer.create(getApplicationContext(), ring);
             mediaPlayer.start();
-
-            System.out.println(ring.toString());
 
             isRunning = true;
             this.startId = 0;

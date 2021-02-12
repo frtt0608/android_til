@@ -74,8 +74,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         remainTime = findViewById(R.id.remainTime);
         ringtone = findViewById(R.id.ringtone);
 
-        Uri tempRing = Uri.parse("content://media/external_primary/audio/media/60?title=Variations&canonical=1");
-        ringtone.setText( tempRing.toString() );
+        Uri tempRing = Uri.parse("content://settings/system/ringtone");
+        ringtone.setText("기본음");
         my_intent.putExtra("uri", tempRing);
 
         alarm_on.setOnClickListener(new View.OnClickListener() {
@@ -183,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     ringtoneUri = ring.toString();
                     ringtone.setText( ring.toString() );
                     my_intent.putExtra("uri", ring);
+                    Log.d("MainActivity", ringtoneUri);
                     decodingUri(ringtoneUri);
                 } else {
                     ringtoneUri = null;
@@ -194,11 +195,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void decodingUri(String uri) {
         String uriStr = Uri.decode(uri);
-        Log.d("uri", uriStr);
         int s = uriStr.indexOf("=") + 1;
         int e = uriStr.indexOf("&");
-        Log.d("uri", s + "");
-        Log.d("uri", e + "");
+        if(s == 0 || e == 0) return;
+
         String subStr = uriStr.substring(s, e);
         Log.d("subStr", subStr);
     }

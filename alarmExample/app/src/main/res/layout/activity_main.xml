@@ -12,6 +12,7 @@
         android:id="@+id/time_picker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:timePickerMode="spinner"
         android:focusableInTouchMode="false"
         tools:layout_editor_absoluteX="0dp" />
 
