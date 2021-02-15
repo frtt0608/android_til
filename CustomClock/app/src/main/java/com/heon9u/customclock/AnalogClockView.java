@@ -28,6 +28,7 @@ public class AnalogClockView extends View {
     private float mMinute;
     private float mSecond;
     private int mHourHandSize;
+    private int mMinuteHandSize;
     private int mHandSize;
     private Rect mRect;
 
@@ -40,16 +41,18 @@ public class AnalogClockView extends View {
         mWidth = getWidth();
         mPadding = 50;
         mCentreX = mWidth/2;
-        mCentreY = mHeight/2;
+        mCentreY = mHeight/2; // 중앙값
+
         mMinimum = Math.min(mHeight, mWidth);
         mRadius = mMinimum/2 - mPadding;
         mAngle = (float) ((Math.PI/30) - (Math.PI/2));
         mPaint = new Paint();
         mPath = new Path();
         mRect = new Rect();
-        mHourHandSize = mRadius - mRadius/2;
+        mHourHandSize = mRadius - mRadius/6;
+        mMinuteHandSize = mRadius - mRadius/2;
         mHandSize = mRadius - mRadius/4;
-        mNumbers = new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+        mNumbers = new int[] {3, 6, 9, 12};
         mIsInit = true;
     }
 
@@ -68,6 +71,9 @@ public class AnalogClockView extends View {
 
     private void drawCircle(Canvas canvas) {
         mPaint.reset();
+        setPaintAttributes(Color.WHITE, Paint.Style.FILL, 0);
+        canvas.drawCircle(mCentreX, mCentreY, mRadius, mPaint);
+
         setPaintAttributes(Color.BLACK, Paint.Style.STROKE, 8);
         canvas.drawCircle(mCentreX, mCentreY, mRadius, mPaint);
     }
@@ -88,28 +94,28 @@ public class AnalogClockView extends View {
         mMinute = calendar.get(Calendar.MINUTE);
         mSecond = calendar.get(Calendar.SECOND);
 
-        drawHourHand(canvas, (mHour + mMinute/60.0) *5f);
+        drawHourHand(canvas, (mHour + mMinute/60.0) * 5f);
         drawMinuteHand(canvas, mMinute);
         drawSecondsHand(canvas, mSecond);
     }
 
     private void drawHourHand(Canvas canvas, double location) {
         mPaint.reset();
-        setPaintAttributes(Color.BLACK, Paint.Style.STROKE, 10);
+        setPaintAttributes(Color.BLACK, Paint.Style.STROKE, 12);
         mAngle = Math.PI * location/30 - Math.PI/2;
         canvas.drawLine(mCentreX, mCentreY,
                 (float) (mCentreX + Math.cos(mAngle)*mHourHandSize),
-                (float)(mCentreY + Math.sin(mAngle)*mHourHandSize),
+                (float) (mCentreY + Math.sin(mAngle)*mHourHandSize),
                 mPaint);
     }
 
     private void drawMinuteHand(Canvas canvas, float location) {
         mPaint.reset();
-        setPaintAttributes(Color.BLACK, Paint.Style.STROKE,8);
+        setPaintAttributes(Color.BLACK, Paint.Style.STROKE,10);
         mAngle = Math.PI * location / 30 - Math.PI / 2;
         canvas.drawLine(mCentreX, mCentreY,
-                (float) (mCentreX+Math.cos(mAngle)*mHandSize),
-                (float) (mCentreY+Math.sin(mAngle)*mHourHandSize),
+                (float) (mCentreX + Math.cos(mAngle)*mMinuteHandSize),
+                (float) (mCentreY + Math.sin(mAngle)*mMinuteHandSize),
                 mPaint);
     }
 
@@ -118,20 +124,38 @@ public class AnalogClockView extends View {
         setPaintAttributes(Color.RED, Paint.Style.STROKE,8);
         mAngle = Math.PI * location/30 - Math.PI/2;
         canvas.drawLine(mCentreX, mCentreY,
-                (float) (mCentreX+Math.cos(mAngle)*mHandSize),
-                (float) (mCentreY+Math.sin(mAngle)*mHourHandSize),
+                (float) (mCentreX + Math.cos(mAngle)*mHandSize),
+                (float) (mCentreY + Math.sin(mAngle)*mHandSize),
                 mPaint);
     }
 
     private void drawNumerals(Canvas canvas) {
-        mPaint.setTextSize(5);
+        setPaintAttributes(R.color.purple_200, Paint.Style.FILL, 60);
+        mPaint.setTextSize(60);
+        mPaint.setFakeBoldText(true);
 
         for (int number : mNumbers) {
             String num = String.valueOf(number);
             mPaint.getTextBounds(num, 0, num.length(), mRect);
             double angle = Math.PI/6 * (number-3);
-            int x = (int) (mCentreX + Math.cos(angle) * mRadius - mRect.width()/2);
-            int y = (int) (mCentreY + Math.sin(angle) * mRadius + mRect.height()/2);
+
+            int x = (int) (mCentreX + Math.cos(angle) * mRadius);
+            int y = (int) (mCentreY + Math.sin(angle) * mRadius);
+
+            if(angle == 0) {
+                x = (int) (x - mRect.width()*1.5);
+                y = y + mRect.height()/2;
+            } else if(angle == Math.PI/6 * 3) {
+                x = x - mRect.width()/2;
+                y = y - mRect.height()/2;
+            } else if(angle == Math.PI/6 * 6) {
+                x = x + mRect.width()/2;
+                y = y + mRect.height()/2;
+            } else {
+                x = x - mRect.width()/2;
+                y = (int) (y + mRect.height()*1.5);
+            }
+
             canvas.drawText(num, x, y, mPaint);
         }
     }
