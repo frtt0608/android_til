@@ -131,7 +131,7 @@ public class AnalogClockView extends View {
 
     private void drawNumerals(Canvas canvas) {
         setPaintAttributes(R.color.purple_200, Paint.Style.FILL, 60);
-        mPaint.setTextSize(60);
+        mPaint.setTextSize(40);
         mPaint.setFakeBoldText(true);
 
         for (int number : mNumbers) {

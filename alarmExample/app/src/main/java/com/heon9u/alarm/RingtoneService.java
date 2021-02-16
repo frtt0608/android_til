@@ -97,6 +97,7 @@ public class RingtoneService extends Service {
 
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
             mediaPlayer = MediaPlayer.create(getApplicationContext(), ring);
             mediaPlayer.start();
 

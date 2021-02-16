@@ -12,9 +12,11 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.Calendar;
 
-public class OnAlarm extends Activity {
+public class OnAlarm extends AppCompatActivity {
 
     Button stop;
     TextView time;
@@ -43,9 +45,5 @@ public class OnAlarm extends Activity {
             stopService(serviceIntent);
             finish();
         });
-    }
-
-    public static boolean isScreenOn(Context context) {
-        return ((PowerManager)context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
     }
 }
