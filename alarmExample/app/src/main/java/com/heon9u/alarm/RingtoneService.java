@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -26,8 +27,7 @@ public class RingtoneService extends Service {
     PowerManager.WakeLock wakeLock;
     int startId, volume;
     boolean isRunning, screenOn;
-    Uri ring;
-    String state;
+    String ring;
     NotificationManager NM;
     Notification.Builder builder;
     Notification notifi;
@@ -41,7 +41,6 @@ public class RingtoneService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        System.out.println("Service on Create");
 //        setWakeLock();
 //        wakeLock.acquire();
 
@@ -66,62 +65,53 @@ public class RingtoneService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         startForeground(1, notifi);
-        state = intent.getStringExtra("state");
-        ring = intent.getParcelableExtra("ring");
+        ring = intent.getStringExtra("ring");
         volume = Integer.parseInt(intent.getStringExtra("volume"));
 
-        System.out.println("Service: " + state);
-
-        assert state != null;
-
-        switch (state) {
-            case "alarm on":
-                startId = 1;
-                Toast.makeText(this, "~~~alarm~~~", Toast.LENGTH_LONG).show();
-                onPage();
-                break;
-            case "alarm off":
-            default:
-                startId = 0;
-                stopService(intent);
-                break;
+        if(ring == null) {
+            Log.d("Service", "ring is null");
+            return START_NOT_STICKY;
         }
 
-        if(!this.isRunning && startId == 1) {
-            AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-            int maxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-            System.out.println(ring.toString());
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                setAudioManager();
+                setRingtone();
+            }
+        }).start();
 
-            am.setStreamVolume(AudioManager.STREAM_MUSIC, maxVol*volume/100,
-                    AudioManager.FLAG_PLAY_SOUND);
-
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-            mediaPlayer = MediaPlayer.create(getApplicationContext(), ring);
-            mediaPlayer.start();
-
-            isRunning = true;
-            this.startId = 0;
-        }
-        else if(this.isRunning && startId == 0) {
-            mediaPlayer.stop();
-            mediaPlayer.reset();
-            mediaPlayer.release();
-
-            isRunning = false;
-            this.startId = 0;
-        }
-        else if(!this.isRunning && startId == 0) {
-            this.isRunning = false;
-            this.startId = 0;
-        }
-        else if(this.isRunning && startId == 1) {
-            this.isRunning = true;
-            this.startId = 1;
-        }
+        onPage();
 
         return START_NOT_STICKY;
+    }
+
+    public void setAudioManager() {
+        AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        int maxVol = am.getStreamMaxVolume(AudioManager.STREAM_ALARM);
+
+        am.setStreamVolume(AudioManager.STREAM_ALARM, maxVol*volume/100,
+                AudioManager.FLAG_PLAY_SOUND);
+    }
+
+    public void setRingtone() {
+        mediaPlayer = new MediaPlayer();
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+        mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), Uri.parse(ring));
+
+//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+//                    .setUsage(AudioAttributes.USAGE_ALARM)
+//                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+//                    .build();
+//
+//            mediaPlayer.setAudioAttributes(audioAttributes);
+//        } else {
+//            mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+//        }
+
+        mediaPlayer.start();
     }
 
     private void setWakeLock() {
@@ -132,7 +122,6 @@ public class RingtoneService extends Service {
                 "app:myWake_tag");
 
         screenOn = powerManager.isScreenOn();
-        System.out.println("현재 화면 상태: " + screenOn);
     }
 
     public void setNotification() {

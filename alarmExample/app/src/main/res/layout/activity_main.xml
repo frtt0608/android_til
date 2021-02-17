@@ -7,8 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="top"
-    tools:context=".MainActivity"
-    android:background="@drawable/back_thunderstorm">
+    tools:context=".MainActivity">
 
     <TimePicker
         android:id="@+id/time_picker"
@@ -52,9 +51,16 @@
         android:orientation="horizontal">
 
         <Button
+            android:id="@+id/mediaStore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="mediaStore" />
+
+        <Button
             android:id="@+id/select"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
             android:text="select"/>
 
         <TextView

@@ -1,49 +1,72 @@
 package com.heon9u.alarm;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
+import android.util.Log;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class AlarmReceiver extends BroadcastReceiver {
     Context context;
-    String state;
+    String ring, volume;
 
     @Override
     public void onReceive(Context context, Intent intent) {
 
         this.context = context;
-        state = intent.getStringExtra("state");
-        System.out.println("Receiver: " + state);
+        ring = intent.getStringExtra("ring");
+        volume = intent.getStringExtra("volume");
+        System.out.println("AlarmReceiver ring: " + ring);
+
+        setTime();
 
         // RingtonePlayingService 서비스 intent 생성
         Intent service_intent = new Intent(context, RingtoneService.class);
-
-        Uri ring = intent.getParcelableExtra("uri");
-
-        // RingtonePlayinService로 extra string값 보내기
-        service_intent.putExtra("state", intent.getExtras().getString("state"));
         service_intent.putExtra("ring", ring);
-        service_intent.putExtra("volume", intent.getStringExtra("volume"));
+        service_intent.putExtra("volume", volume);
 
         // start the ringtone service
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){
-            System.out.println("startForegroundService");
+            repeat();
             context.startForegroundService(service_intent);
         }else{
-            System.out.println("startService");
             context.startService(service_intent);
         }
     }
 
-    public void onPage() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Intent onIntent = new Intent(context, OnAlarm.class);
-                onIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(onIntent);
-            }
-        }).start();
+    public void repeat() {
+        Calendar calendar = Calendar.getInstance();
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent repeatIntent = new Intent(context, AlarmReceiver.class);
+
+        repeatIntent.putExtra("ring", ring);
+        repeatIntent.putExtra("volume", volume);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
+                1,
+                repeatIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                    calendar.getTimeInMillis() + 10000,
+                    pendingIntent);
+
+        }
+    }
+
+    public void setTime() {
+        long dt = System.currentTimeMillis();
+        Date date = new Date(dt);
+        SimpleDateFormat sdf = new SimpleDateFormat("MM월 dd일 EE요일 hh:mm:ss");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT+9"));
+        System.out.println("Receiver: " + sdf.format(date));
     }
 }

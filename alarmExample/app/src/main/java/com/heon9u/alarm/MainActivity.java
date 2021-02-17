@@ -31,14 +31,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     AlarmManager alarm_manager;
     TimePicker alarm_timepicker;
     PendingIntent pendingIntent;
-    long curTime;
     Intent my_intent;
-    Button select, alarm_off, check;
+    Button btn_start, btn_finish, select, check, mediaStore;
     final int REQUESTCODE_RINGTONE_PICKER = 1000;
+    final int recode = 1;
     String ringtoneUri;
-    MediaPlayer mediaPlayer;
     Uri ring;
-    int recode;
+
     SeekBar volume;
 
     @Override
@@ -51,55 +50,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             onAlertDialog();
         }
 
-        recode = 0;
-
         alarm_manager = (AlarmManager) getSystemService(ALARM_SERVICE);
         alarm_timepicker = findViewById(R.id.time_picker);
 
-        Calendar calendar = Calendar.getInstance();
         my_intent = new Intent(this, AlarmReceiver.class);
 
         // 알람 시작 버튼
-        Button alarm_on = findViewById(R.id.btn_start);
-        alarm_off = findViewById(R.id.btn_finish);
-        alarm_off.setOnClickListener(this);
+        btn_start = findViewById(R.id.btn_start);
+        btn_finish = findViewById(R.id.btn_finish);
         select = findViewById(R.id.select);
-        select.setOnClickListener(this);
         check = findViewById(R.id.check);
-        check.setOnClickListener(this);
         volume = findViewById(R.id.volume);
+        mediaStore = findViewById(R.id.mediaStore);
+
+        btn_start.setOnClickListener(this);
+        btn_finish.setOnClickListener(this);
+        select.setOnClickListener(this);
+        check.setOnClickListener(this);
+
         setVolumeChanged();
         volumeInt = findViewById(R.id.volumeInt);
 
         remainTime = findViewById(R.id.remainTime);
         ringtone = findViewById(R.id.ringtone);
 
-        Uri tempRing = Uri.parse("content://settings/system/ringtone");
+        String ring = "content://settings/system/ringtone";
         ringtone.setText("기본음");
-        my_intent.putExtra("uri", tempRing);
-
-        alarm_on.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.M)
-            @Override
-            public void onClick(View v) {
-                // 시간 가져옴
-                int hour = alarm_timepicker.getHour();
-                int minute = alarm_timepicker.getMinute();
-
-                Toast.makeText(MainActivity.this,"Alarm 예정 " + hour + "시 " + minute + "분",Toast.LENGTH_SHORT).show();
-
-                // reveiver에 string 값 넘겨주기
-                my_intent.putExtra("state","alarm on");
-                my_intent.putExtra("volume", volumeInt.getText());
-                pendingIntent = PendingIntent.getBroadcast(MainActivity.this, recode, my_intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT);
-                // 알람셋팅
-                System.out.println("알람 등록");
-                alarm_manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
-                        System.currentTimeMillis() + 6500,
-                        pendingIntent);
-            }
-        });
+        my_intent.putExtra("ring", ring);
     }
 
     public void checkAlarm() {
@@ -113,23 +90,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void cancel() {
+    public void cancelAlarm() {
+        Log.d("MainActivity", "알람 삭제하기");
 
         pendingIntent = PendingIntent.getBroadcast(MainActivity.this, recode, my_intent,
                 PendingIntent.FLAG_NO_CREATE);
 
         if(pendingIntent == null) {
             System.out.println("no alarm");
-
         } else {
-            pendingIntent = PendingIntent.getBroadcast(MainActivity.this, recode, my_intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
+            pendingIntent = PendingIntent.getBroadcast(MainActivity.this, recode, my_intent, 0);
             alarm_manager.cancel(pendingIntent);
             pendingIntent.cancel();
-
-            my_intent.putExtra("state","alarm off");
-            System.out.println("cancel alarm");
-            sendBroadcast(my_intent);
         }
     }
 
@@ -137,9 +109,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
 
         switch (v.getId()) {
+            case R.id.btn_start:
+                managedAlarm();
+                break;
+
             case R.id.btn_finish:
-                cancel();
-                releaseRingtone();
+                cancelAlarm();
                 break;
 
             case R.id.select:
@@ -149,7 +124,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.check:
                 checkAlarm();
                 break;
+
+            case R.id.mediaStore:
+
         }
+    }
+
+    public void showMediaStore() {
+        Intent intent = new Intent(this, RingtoneListActivity.class);
+        startActivity(intent);
+    }
+
+    public void managedAlarm() {
+        Log.d("AlarmManager", "alarm 초기 등록");
+        Calendar calendar = Calendar.getInstance();
+
+        my_intent.putExtra("state", "alarm on");
+        my_intent.putExtra("volume", volumeInt.getText());
+        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, recode, my_intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarm_manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                    calendar.getTimeInMillis() + 10000,
+                    pendingIntent);
+        }
+
+        Toast.makeText(MainActivity.this, "10초후 알람", Toast.LENGTH_SHORT).show();
     }
 
     public void setVolumeChanged() {
@@ -169,28 +170,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             }
         });
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if(requestCode == REQUESTCODE_RINGTONE_PICKER) {
-            if (resultCode == RESULT_OK) {
-                // -- 알림음 재생하는 코드 -- //
-                ring = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-                if (ring != null) {
-                    ringtoneUri = ring.toString();
-                    ringtone.setText( ring.toString() );
-                    my_intent.putExtra("uri", ring);
-                    Log.d("MainActivity", ringtoneUri);
-                    decodingUri(ringtoneUri);
-                } else {
-                    ringtoneUri = null;
-                    ringtone.setText( "Choose ringtone" );
-                }
-            }
-        }
     }
 
     public void decodingUri(String uri) {
@@ -225,13 +204,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivity(intent);
     }
 
-    private void releaseRingtone() {
-        if( mediaPlayer != null ) {
-            if( mediaPlayer.isPlaying() ) {
-                mediaPlayer.stop();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == REQUESTCODE_RINGTONE_PICKER) {
+            if (resultCode == RESULT_OK) {
+                // -- 알림음 재생하는 코드 -- //
+                ring = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+                if (ring != null) {
+                    ringtoneUri = ring.toString();
+                    ringtone.setText( ring.toString() );
+                    my_intent.putExtra("ring", ringtoneUri);
+                    Log.d("MainActivity", ringtoneUri);
+                    decodingUri(ringtoneUri);
+                } else {
+                    ringtoneUri = null;
+                    ringtone.setText( "Choose ringtone" );
+                }
             }
-            mediaPlayer.release();
-            mediaPlayer = null;
         }
     }
 
@@ -240,9 +231,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Choose Ringtone!" );
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
-        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALL);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
 
          this.startActivityForResult( intent, REQUESTCODE_RINGTONE_PICKER );
+    }
+
+    public void getRingtonePath() {
+
     }
 
 //    public void setTime() {
