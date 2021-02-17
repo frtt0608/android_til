@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">알림음 선택하기</string>
+    <string name="app_name"></string>
     <string name="title_activity_ringtone_choice">RingtoneChoiceActivity</string>
-    <string name="tab_text_1">Tab 1</string>
-    <string name="tab_text_2">Tab 2</string>
+    <string name="tab_text_1">벨소리</string>
+    <string name="tab_text_2">내 음악</string>
     <string name="title_activity_ringtone_list">RingtoneListActivity</string>
 </resources>

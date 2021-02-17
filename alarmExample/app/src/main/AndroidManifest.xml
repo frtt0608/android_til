@@ -29,7 +29,6 @@
 
         <activity
             android:name=".RingtoneListActivity"
-            android:label="@string/title_activity_ringtone_list"
             android:theme="@style/Theme.Alarm.NoActionBar"></activity>
 
         <activity

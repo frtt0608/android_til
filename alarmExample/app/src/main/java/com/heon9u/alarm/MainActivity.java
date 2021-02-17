@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_finish.setOnClickListener(this);
         select.setOnClickListener(this);
         check.setOnClickListener(this);
+        mediaStore.setOnClickListener(this);
 
         setVolumeChanged();
         volumeInt = findViewById(R.id.volumeInt);
@@ -126,7 +127,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.mediaStore:
-
+                showMediaStore();
+                break;
         }
     }
 
