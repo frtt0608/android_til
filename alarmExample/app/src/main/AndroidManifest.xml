@@ -28,10 +28,6 @@
         </activity>
 
         <activity
-            android:name=".RingtoneListActivity"
-            android:theme="@style/Theme.Alarm.NoActionBar"></activity>
-
-        <activity
             android:name=".OnAlarm"
             android:excludeFromRecents="true"
             android:taskAffinity="com.heon9u.alarm.onAlarm"

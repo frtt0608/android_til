@@ -133,8 +133,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void showMediaStore() {
-        Intent intent = new Intent(this, RingtoneListActivity.class);
-        startActivity(intent);
+//        Intent intent = new Intent(this, RingtoneListActivity.class);
+//        startActivity(intent);
     }
 
     public void managedAlarm() {
