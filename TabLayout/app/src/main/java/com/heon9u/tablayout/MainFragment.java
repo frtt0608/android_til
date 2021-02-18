@@ -64,28 +64,8 @@ public class MainFragment extends Fragment {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        if(ringtoneAdapter.mediaPlayer != null) {
-            if(ringtoneAdapter.mediaPlayer.isPlaying()) {
-                ringtoneAdapter.mediaPlayer.stop();
-                ringtoneAdapter.mediaPlayer.release();
-            }
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.d("dd", "stop");
-    }
-
-
-
-    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         ringtoneList = new ArrayList<>();
         getBasicAlarm();
     }

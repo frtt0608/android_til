@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -50,8 +49,7 @@ public class MainActivity extends AppCompatActivity {
             boolean flag = isExternalStorageReadable();
             if(flag) {
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    getDownload();
-                    afterQ();
+                    getDownloads();
                 } else {
                     getMediaStore();
                 }
@@ -61,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void getBasicAlarm() {
         // content://media/external_primary/audio/media/21?title=Castle&canonical=1
+
         RingtoneManager ringtoneManager = new RingtoneManager(this);
         ringtoneManager.setType(RingtoneManager.TYPE_ALL);
         Cursor cursor = ringtoneManager.getCursor();
@@ -81,71 +80,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    private void afterQ() {
-//        ContentValues values = new ContentValues();
-//        values.put(MediaStore.Downloads.MIME_TYPE, "audio/*");
-//        values.put(MediaStore.Downloads.DOWNLOAD_URI, "uri");
-//
-//        ContentResolver contentResolver = getContentResolver();
-//        Uri collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
-
-        Uri uri = MediaStore.Files.getContentUri("external");
-        String[] projection = {
-                MediaStore.Files.FileColumns._ID,
-                MediaStore.Files.FileColumns.DISPLAY_NAME,
-                MediaStore.Files.FileColumns.DATA };
-
-        String selection = MediaStore.Files.FileColumns.MIME_TYPE + "=?";
-        String[] selectionArgs = new String[] {
-                MimeTypeMap.getSingleton().getMimeTypeFromExtension("mp3")
-        };
-
-        Cursor cursor = getContentResolver().query(uri, projection, selection, selectionArgs, null);
-
-        if(cursor.getCount() == 0) {
-            Log.e("afterQ", "cursor null or cursor is empty");
-        } else {
-            while(cursor.moveToNext()) {
-                int idColumn = cursor.getColumnIndex(MediaStore.Files.FileColumns._ID);
-                long id = cursor.getLong(idColumn);
-                Uri contentUri = Uri.withAppendedPath(
-                        MediaStore.Files.getContentUri("external"),
-                        String.valueOf(id));
-                System.out.println("Content Uri : " + contentUri);
-                System.out.println("Content Uri toString :" + contentUri.toString());
-                System.out.println("Content Uri getPath :" + contentUri.getPath());
-                String realUri = uri + File.separator + cursor.getString(0);
-
-                System.out.println(realUri);
-            }
-        }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.Q)
-    private void getDownload() {
+    public void getDownloads() {
         Uri uri = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
         String[] projection = new String[] {
-                MediaStore.Downloads.TITLE,
-                MediaStore.Downloads.DOWNLOAD_URI
+                MediaStore.Downloads.TITLE
         };
 
-        Cursor cursor = getContentResolver().query(uri, null,
-                null, null, null);
+        Cursor cursor = getContentResolver().query(uri,projection,null,null,null);
 
         if(cursor.getCount() == 0) {
-            Log.e("getDownload", "cursor null or cursor is empty");
+            Log.e("downloads", "cursor null or cursor is empty");
         } else {
             while(cursor.moveToNext()) {
-                int pos = cursor.getPosition();
-                System.out.println(pos);
+                String title = cursor.getString(0);
+                Log.d("downloads", title);
             }
         }
     }
 
-    private void getMediaStore() {
+    public void getMediaStore() {
         Uri externalUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         String[] projection = new String[]{
                 MediaStore.Audio.Media._ID,
+                MediaStore.Audio.Media.TITLE,
                 MediaStore.Audio.Media.DISPLAY_NAME,
                 MediaStore.Audio.Media.MIME_TYPE
         };
@@ -153,40 +110,28 @@ public class MainActivity extends AppCompatActivity {
         Cursor cursor = getContentResolver().query(externalUri, projection,
                 null, null,
                 MediaStore.Audio.Media.TITLE + " ASC");
+        Log.d("getMediaStore", cursor.getCount()+"");
 
         if (cursor.getCount() == 0) {
-            Log.e("getMediaStore", "cursor null or cursor is empty");
+            Log.e("audio", "cursor null or cursor is empty");
         } else {
             while(cursor.moveToNext()) {
+                String str = cursor.getString(0);
+                String title = cursor.getString(1);
                 String contentUrl = externalUri.toString() + "/" + cursor.getString(0);
-                try {
-                    InputStream is = getContentResolver().openInputStream(Uri.parse(contentUrl));
-                    int data = 0;
-                    StringBuilder sb = new StringBuilder();
-
-                    while ((data = is.read()) != -1) {
-                        sb.append((char) data);
-                        System.out.println(data);
-                    }
-
-                    is.close();
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                Log.d("audio", title);
             }
         }
-
-
     }
 
     public boolean isExternalStorageReadable() {
         String state = Environment.getExternalStorageState();
         if(Environment.MEDIA_MOUNTED.equals(state) ||
                                     Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            Log.d("외부저장소", "접근 true");
             return true;
         }
-
+        Log.d("외부저장소", "접근 false");
         return false;
     }
 
@@ -196,9 +141,11 @@ public class MainActivity extends AppCompatActivity {
 
         if(requestCode == REQUEST_CODE_MEDIA) {
             if(resultCode == RESULT_OK) {
-                Log.d("MainActivity", "get the result");
                 Ringtone ringtone = (Ringtone) data.getSerializableExtra("Ringtone");
-                mediaName.setText(ringtone.getTitle());
+                if(ringtone != null) {
+                    mediaName.setText(ringtone.getTitle());
+                    Log.d("MainActivity", ringtone.getUri());
+                }
             }
         }
     }

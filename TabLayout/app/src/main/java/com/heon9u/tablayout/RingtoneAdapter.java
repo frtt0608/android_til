@@ -21,9 +21,11 @@ import java.util.ArrayList;
 public class RingtoneAdapter extends RecyclerView.Adapter<RingtoneAdapter.RingtoneViewHolder> {
 
     public int selectedItem = -1;
-    MediaPlayer mediaPlayer = new MediaPlayer();
+    public static MediaPlayer mediaPlayer = new MediaPlayer();
     private Context context;
     private ArrayList<Ringtone> ringtoneList;
+
+    public RingtoneAdapter() { }
 
     public RingtoneAdapter(Context context, ArrayList<Ringtone> ringtoneList) {
         this.context = context;
@@ -54,6 +56,7 @@ public class RingtoneAdapter extends RecyclerView.Adapter<RingtoneAdapter.Ringto
     }
 
     public void stopMediaPlayer() {
+        Log.d("RingtoneAdapter", "stopMedia");
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();

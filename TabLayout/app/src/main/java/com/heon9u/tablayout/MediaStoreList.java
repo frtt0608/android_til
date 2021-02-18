@@ -1,6 +1,8 @@
 package com.heon9u.tablayout;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,6 +37,26 @@ public class MediaStoreList extends AppCompatActivity {
 
         prepareViewPager(viewPager);
         tabLayout.setupWithViewPager(viewPager);
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                switch (tab.getPosition()) {
+                    case 0:
+
+                        break;
+                    case 1:
+                        RingtoneAdapter ringtoneAdapter = new RingtoneAdapter();
+                        ringtoneAdapter.stopMediaPlayer();
+                        break;
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) { }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) { }
+        });
     }
 
     private void prepareViewPager(ViewPager viewPager) {
