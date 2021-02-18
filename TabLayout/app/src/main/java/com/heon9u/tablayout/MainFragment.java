@@ -1,59 +1,35 @@
 package com.heon9u.tablayout;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.database.Cursor;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link MainFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.util.ArrayList;
+
 public class MainFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    AppCompatButton save;
+    RecyclerView recyclerView;
+    ArrayList<Ringtone> ringtoneList;
+    RingtoneAdapter ringtoneAdapter;
 
     public MainFragment() {
         // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MainFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MainFragment newInstance(String param1, String param2) {
-        MainFragment fragment = new MainFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -61,10 +37,76 @@ public class MainFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_main, container, false);
-        TextView textView = view.findViewById(R.id.textView);
-        String sTitle = getArguments().getString("title");
-        textView.setText(sTitle);
+        recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        ringtoneAdapter = new RingtoneAdapter(getContext(), ringtoneList);
+        recyclerView.setAdapter(ringtoneAdapter);
+
+        save = view.findViewById(R.id.save);
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int index = ringtoneAdapter.selectedItem;
+                if(index == -1) {
+                    Log.e("MainFragment", "index is -1, you don't choice anything");
+                } else {
+                    Ringtone ringtone = ringtoneList.get(index);
+                    Intent intent = new Intent();
+                    intent.putExtra("Ringtone", ringtone);
+                    getActivity().setResult(Activity.RESULT_OK, intent);
+                    getActivity().finish();
+                }
+            }
+        });
 
         return view;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(ringtoneAdapter.mediaPlayer != null) {
+            if(ringtoneAdapter.mediaPlayer.isPlaying()) {
+                ringtoneAdapter.mediaPlayer.stop();
+                ringtoneAdapter.mediaPlayer.release();
+            }
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d("dd", "stop");
+    }
+
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        ringtoneList = new ArrayList<>();
+        getBasicAlarm();
+    }
+
+    private void getBasicAlarm() {
+        // content://media/external_primary/audio/media/21?title=Castle&canonical=1
+
+        RingtoneManager ringtoneManager = new RingtoneManager(getActivity());
+        ringtoneManager.setType(RingtoneManager.TYPE_ALARM);
+        Cursor cursor = ringtoneManager.getCursor();
+
+        if(cursor.getCount() == 0) {
+            Log.e("TAG", "cursor null or cursor is empty");
+        } else {
+            while(cursor.moveToNext()) {
+                int pos = cursor.getPosition();
+                String title = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
+                Uri uri = ringtoneManager.getRingtoneUri(pos);
+
+                ringtoneList.add(new Ringtone(title, uri.toString()));
+            }
+        }
     }
 }

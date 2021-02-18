@@ -30,25 +30,17 @@ public class MediaStoreList extends AppCompatActivity {
 
         // tab title
         ArrayList<String> arrayList = new ArrayList<>();
-        arrayList.add("벨소리");
-        arrayList.add("내 음악");
+        arrayList.add("기본 벨소리");
+        arrayList.add("저장된 음악");
 
-        prepareViewPager(viewPager, arrayList);
+        prepareViewPager(viewPager);
         tabLayout.setupWithViewPager(viewPager);
     }
 
-    private void prepareViewPager(ViewPager viewPager, ArrayList<String> arrayList) {
+    private void prepareViewPager(ViewPager viewPager) {
         MainAdapter mainAdapter = new MainAdapter(getSupportFragmentManager());
-        MainFragment fragment = new MainFragment();
-        
-        for(int i=0; i<arrayList.size(); i++) {
-            // bundle init
-            Bundle bundle = new Bundle();
-            bundle.putString("title", arrayList.get(i));
-            fragment.setArguments(bundle);
-            mainAdapter.addFragment(fragment, arrayList.get(i));
-            fragment = new MainFragment();
-        }
+        mainAdapter.addFragment(new MainFragment(), "기본 벨소리");
+        mainAdapter.addFragment(new MyMediaFragment(), "저장된 음악");
 
         viewPager.setAdapter(mainAdapter);
     }

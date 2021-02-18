@@ -14,6 +14,18 @@
         android:layout_height="wrap_content"
         android:text="mediaStore"/>
 
+    <Button
+        android:id="@+id/search"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="기본음악"/>
+
+    <Button
+        android:id="@+id/searchDownload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="저장된 음악"/>
+
     <TextView
         android:id="@+id/mediaName"
         android:layout_width="wrap_content"

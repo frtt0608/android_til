@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     ringtoneUri = ring.toString();
                     ringtone.setText( ring.toString() );
                     my_intent.putExtra("ring", ringtoneUri);
-                    Log.d("MainActivity", ringtoneUri);
+                    Log.d("MainActivity", ring+"");
                     decodingUri(ringtoneUri);
                 } else {
                     ringtoneUri = null;
