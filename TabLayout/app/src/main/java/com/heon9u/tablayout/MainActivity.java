@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         // content://media/external_primary/audio/media/21?title=Castle&canonical=1
 
         RingtoneManager ringtoneManager = new RingtoneManager(this);
-        ringtoneManager.setType(RingtoneManager.TYPE_ALL);
+        ringtoneManager.setType(RingtoneManager.TYPE_ALARM);
         Cursor cursor = ringtoneManager.getCursor();
 
         if(cursor.getCount() == 0) {
@@ -76,17 +76,25 @@ public class MainActivity extends AppCompatActivity {
 
                 ringtoneList.add(new Ringtone(title, uri.toString()));
             }
+
+            Log.d("BasicAlarm", "success");
         }
     }
 
+//    /data/media/0/Download/
     @RequiresApi(api = Build.VERSION_CODES.Q)
     public void getDownloads() {
-        Uri uri = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+        Uri uri = MediaStore.Files.getContentUri("internal");
+        String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "=" +
+                MediaStore.Files.FileColumns.MEDIA_TYPE_AUDIO;
+
         String[] projection = new String[] {
-                MediaStore.Downloads.TITLE
+                MediaStore.Audio.Media._ID
         };
 
-        Cursor cursor = getContentResolver().query(uri,projection,null,null,null);
+        Cursor cursor = getContentResolver().query(uri,
+                null,
+                selection,null,null);
 
         if(cursor.getCount() == 0) {
             Log.e("downloads", "cursor null or cursor is empty");
@@ -100,11 +108,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void getMediaStore() {
         Uri externalUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+
         String[] projection = new String[]{
                 MediaStore.Audio.Media._ID,
-                MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.DISPLAY_NAME,
-                MediaStore.Audio.Media.MIME_TYPE
+                MediaStore.Audio.Media.TITLE
         };
 
         Cursor cursor = getContentResolver().query(externalUri, projection,
@@ -119,7 +126,8 @@ public class MainActivity extends AppCompatActivity {
                 String str = cursor.getString(0);
                 String title = cursor.getString(1);
                 String contentUrl = externalUri.toString() + "/" + cursor.getString(0);
-                Log.d("audio", title);
+                Log.d("title", title);
+                Log.d("contentUrl", contentUrl);
             }
         }
     }

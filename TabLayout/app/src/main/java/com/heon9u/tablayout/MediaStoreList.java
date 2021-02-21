@@ -1,5 +1,6 @@
 package com.heon9u.tablayout;
 
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -21,6 +22,7 @@ public class MediaStoreList extends AppCompatActivity {
 
     TabLayout tabLayout;
     ViewPager viewPager;
+    public static MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +44,8 @@ public class MediaStoreList extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 switch (tab.getPosition()) {
                     case 0:
-
+                        MyMediaAdapter myMediaAdapter = new MyMediaAdapter();
+                        myMediaAdapter.stopMediaPlayer();
                         break;
                     case 1:
                         RingtoneAdapter ringtoneAdapter = new RingtoneAdapter();

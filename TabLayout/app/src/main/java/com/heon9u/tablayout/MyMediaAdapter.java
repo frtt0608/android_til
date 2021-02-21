@@ -3,14 +3,13 @@ package com.heon9u.tablayout;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -18,33 +17,31 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-public class RingtoneAdapter extends RecyclerView.Adapter<RingtoneAdapter.RingtoneViewHolder> {
+public class MyMediaAdapter extends RecyclerView.Adapter<MyMediaAdapter.MyMediaViewHolder> {
 
     public int selectedItem = -1;
     public static MediaPlayer mediaPlayer;
     private Context context;
     private ArrayList<Ringtone> ringtoneList;
 
-    public RingtoneAdapter() { }
+    public MyMediaAdapter() { }
 
-    public RingtoneAdapter(Context context, ArrayList<Ringtone> ringtoneList) {
+    public MyMediaAdapter(Context context, ArrayList<Ringtone> ringtoneList) {
         this.context = context;
         this.ringtoneList = ringtoneList;
     }
 
     @NonNull
     @Override
-    public RingtoneAdapter.RingtoneViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
+    public MyMediaAdapter.MyMediaViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.ringtone_item, parent, false);
-        RingtoneViewHolder ringtoneViewHolder = new RingtoneViewHolder(view);
 
-        return ringtoneViewHolder;
+        return new MyMediaViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RingtoneAdapter.RingtoneViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MyMediaAdapter.MyMediaViewHolder holder, int position) {
         String title = ringtoneList.get(position).getTitle();
         holder.title.setText(title);
         holder.radioButton.setChecked(position == selectedItem);
@@ -52,7 +49,7 @@ public class RingtoneAdapter extends RecyclerView.Adapter<RingtoneAdapter.Ringto
 
     public void stopMediaPlayer() {
         if (mediaPlayer != null) {
-            Log.d("RingtoneAdapter", "stopMedia");
+            Log.d("MyMediaAdapter", "stopMedia");
 
             mediaPlayer.stop();
             mediaPlayer.release();
@@ -70,27 +67,26 @@ public class RingtoneAdapter extends RecyclerView.Adapter<RingtoneAdapter.Ringto
                     mediaPlayer.start();
                 }
             });
-            mediaPlayer.prepareAsync();
 
+            mediaPlayer.prepareAsync();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-
     @Override
     public int getItemCount() {
-        if (ringtoneList == null) return 0;
+        if(ringtoneList == null) return 0;
         return ringtoneList.size();
     }
 
-    public class RingtoneViewHolder extends RecyclerView.ViewHolder {
+    public class MyMediaViewHolder extends RecyclerView.ViewHolder {
 
         CardView cardView;
         RadioButton radioButton;
         TextView title;
 
-        public RingtoneViewHolder(@NonNull View itemView) {
+        public MyMediaViewHolder(@NonNull View itemView) {
             super(itemView);
 
             cardView = itemView.findViewById(R.id.cardView);
@@ -110,6 +106,4 @@ public class RingtoneAdapter extends RecyclerView.Adapter<RingtoneAdapter.Ringto
             title.setOnClickListener(clickListener);
         }
     }
-
-
 }

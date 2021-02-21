@@ -51,11 +51,7 @@ public class MainFragment extends Fragment {
                 if(index == -1) {
                     Log.e("MainFragment", "index is -1, you don't choice anything");
                 } else {
-                    Ringtone ringtone = ringtoneList.get(index);
-                    Intent intent = new Intent();
-                    intent.putExtra("Ringtone", ringtone);
-                    getActivity().setResult(Activity.RESULT_OK, intent);
-                    getActivity().finish();
+                    transmitRingtone(index);
                 }
             }
         });
@@ -88,5 +84,20 @@ public class MainFragment extends Fragment {
                 ringtoneList.add(new Ringtone(title, uri.toString()));
             }
         }
+        cursor.close();
+    }
+
+    public void transmitRingtone(int index) {
+        Ringtone ringtone = ringtoneList.get(index);
+        Intent intent = new Intent();
+        intent.putExtra("Ringtone", ringtone);
+        getActivity().setResult(Activity.RESULT_OK, intent);
+        getActivity().finish();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        ringtoneAdapter.stopMediaPlayer();
     }
 }
