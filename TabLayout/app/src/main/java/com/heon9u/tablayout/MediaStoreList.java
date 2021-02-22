@@ -1,6 +1,11 @@
 package com.heon9u.tablayout;
 
+import android.content.Context;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -28,7 +33,7 @@ public class MediaStoreList extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.media_list);
-
+        mediaPlayer = null;
         tabLayout = findViewById(R.id.tabLayout);
         viewPager = findViewById(R.id.viewPager);
 
@@ -42,16 +47,8 @@ public class MediaStoreList extends AppCompatActivity {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                switch (tab.getPosition()) {
-                    case 0:
-                        MyMediaAdapter myMediaAdapter = new MyMediaAdapter();
-                        myMediaAdapter.stopMediaPlayer();
-                        break;
-                    case 1:
-                        RingtoneAdapter ringtoneAdapter = new RingtoneAdapter();
-                        ringtoneAdapter.stopMediaPlayer();
-                        break;
-                }
+                if(mediaPlayer != null)
+                    stopMediaPlayer();
             }
 
             @Override
@@ -68,5 +65,29 @@ public class MediaStoreList extends AppCompatActivity {
         mainAdapter.addFragment(new MyMediaFragment(), "저장된 음악");
 
         viewPager.setAdapter(mainAdapter);
+    }
+
+    public static void startMediaPlayer(Context context, Uri uri) {
+        try {
+            Log.d("MediaPlayer", uri.toString());
+            if(mediaPlayer == null)
+                mediaPlayer = new MediaPlayer();
+
+            mediaPlayer.setDataSource(context, uri);
+            mediaPlayer.setOnPreparedListener(mp -> mp.start());
+            mediaPlayer.setOnCompletionListener(mp -> mp.release());
+            mediaPlayer.prepareAsync();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void stopMediaPlayer() {
+        if(mediaPlayer != null) {
+            Log.d("MediaPlayer", "stopMedia");
+//            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 }

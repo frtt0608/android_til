@@ -109,6 +109,6 @@ public class MyMediaFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        myMediaAdapter.stopMediaPlayer();
+        MediaStoreList.stopMediaPlayer();
     }
 }

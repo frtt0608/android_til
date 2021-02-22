@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class MyMediaAdapter extends RecyclerView.Adapter<MyMediaAdapter.MyMediaViewHolder> {
 
     public int selectedItem = -1;
-    public static MediaPlayer mediaPlayer;
+    public static MediaPlayer mediaPlayer = new MediaPlayer();
     private Context context;
     private ArrayList<Ringtone> ringtoneList;
 
@@ -47,33 +47,6 @@ public class MyMediaAdapter extends RecyclerView.Adapter<MyMediaAdapter.MyMediaV
         holder.radioButton.setChecked(position == selectedItem);
     }
 
-    public void stopMediaPlayer() {
-        if (mediaPlayer != null) {
-            Log.d("MyMediaAdapter", "stopMedia");
-
-            mediaPlayer.stop();
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
-    }
-
-    public void startMediaPlayer(Uri uri) {
-        try {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(context, uri);
-            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mediaPlayer.start();
-                }
-            });
-
-            mediaPlayer.prepareAsync();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public int getItemCount() {
         if(ringtoneList == null) return 0;
@@ -97,8 +70,10 @@ public class MyMediaAdapter extends RecyclerView.Adapter<MyMediaAdapter.MyMediaV
                 @Override
                 public void onClick(View v) {
                     selectedItem = getAdapterPosition();
-                    stopMediaPlayer();
-                    startMediaPlayer(Uri.parse(ringtoneList.get(selectedItem).getUri()));
+                    Uri uri = Uri.parse(ringtoneList.get(selectedItem).getUri());
+                    if(MediaStoreList.mediaPlayer != null)
+                        MediaStoreList.stopMediaPlayer();
+                    MediaStoreList.startMediaPlayer(context, uri);
                     notifyDataSetChanged();
                 }
             };

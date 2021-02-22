@@ -1,8 +1,11 @@
 package com.heon9u.tablayout;
 
 import android.content.Context;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +24,7 @@ import java.util.ArrayList;
 public class RingtoneAdapter extends RecyclerView.Adapter<RingtoneAdapter.RingtoneViewHolder> {
 
     public int selectedItem = -1;
-    public static MediaPlayer mediaPlayer;
+    public MediaPlayer mediaPlayer;
     private Context context;
     private ArrayList<Ringtone> ringtoneList;
 
@@ -50,34 +53,6 @@ public class RingtoneAdapter extends RecyclerView.Adapter<RingtoneAdapter.Ringto
         holder.radioButton.setChecked(position == selectedItem);
     }
 
-    public void stopMediaPlayer() {
-        if (mediaPlayer != null) {
-            Log.d("RingtoneAdapter", "stopMedia");
-
-            mediaPlayer.stop();
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
-    }
-
-    public void startMediaPlayer(Uri uri) {
-        try {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(context, uri);
-            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mediaPlayer.start();
-                }
-            });
-            mediaPlayer.prepareAsync();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
     @Override
     public int getItemCount() {
         if (ringtoneList == null) return 0;
@@ -101,8 +76,10 @@ public class RingtoneAdapter extends RecyclerView.Adapter<RingtoneAdapter.Ringto
                 @Override
                 public void onClick(View v) {
                     selectedItem = getAdapterPosition();
-                    stopMediaPlayer();
-                    startMediaPlayer(Uri.parse(ringtoneList.get(selectedItem).getUri()));
+                    Uri uri = Uri.parse(ringtoneList.get(selectedItem).getUri());
+                    if(MediaStoreList.mediaPlayer != null)
+                        MediaStoreList.stopMediaPlayer();
+                    MediaStoreList.startMediaPlayer(context, uri);
                     notifyDataSetChanged();
                 }
             };

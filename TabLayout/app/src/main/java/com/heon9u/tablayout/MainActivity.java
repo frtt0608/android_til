@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         // content://media/external_primary/audio/media/21?title=Castle&canonical=1
 
         RingtoneManager ringtoneManager = new RingtoneManager(this);
-        ringtoneManager.setType(RingtoneManager.TYPE_ALARM);
+        ringtoneManager.setType(RingtoneManager.TYPE_ALL);
         Cursor cursor = ringtoneManager.getCursor();
 
         if(cursor.getCount() == 0) {
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 ringtoneList.add(new Ringtone(title, uri.toString()));
             }
 
-            Log.d("BasicAlarm", "success");
+            Log.d("BasicAlarm", "success" + ringtoneList.size());
         }
     }
 

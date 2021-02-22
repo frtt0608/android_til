@@ -83,6 +83,7 @@ public class MainFragment extends Fragment {
 
                 ringtoneList.add(new Ringtone(title, uri.toString()));
             }
+            Log.d("TAG", ringtoneList.size() + "");
         }
         cursor.close();
     }
@@ -98,6 +99,6 @@ public class MainFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        ringtoneAdapter.stopMediaPlayer();
+        MediaStoreList.stopMediaPlayer();
     }
 }
