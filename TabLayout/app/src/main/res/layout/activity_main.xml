@@ -20,11 +20,38 @@
         android:layout_height="wrap_content"
         android:text="기본음악"/>
 
+    <TextView
+        android:id="@+id/basicCnt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
     <Button
-        android:id="@+id/searchDownload"
+        android:id="@+id/mediaAudio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="저장된 음악"/>
+        android:text="mediaAudio"/>
+
+    <TextView
+        android:id="@+id/audioCnt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/mediaDownload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="mediaDownload"/>
+
+    <TextView
+        android:id="@+id/downloadCnt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/mediaFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="mediaFile"/>
 
     <TextView
         android:id="@+id/mediaName"

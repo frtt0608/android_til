@@ -1,17 +1,25 @@
 package com.heon9u.tablayout;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,8 +30,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button mediaStore, search, searchDownload;
-    TextView mediaName;
+    Button mediaStore, search, mediaAudio, mediaDownload, mediaFile;
+    TextView mediaName, basicCnt, audioCnt, downloadCnt;
     final int REQUEST_CODE_MEDIA = 1313;
 
     @Override
@@ -31,82 +39,89 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mediaName = findViewById(R.id.mediaName);
         mediaStore = findViewById(R.id.mediaStore);
         search = findViewById(R.id.search);
-        searchDownload = findViewById(R.id.searchDownload);
-        mediaName = findViewById(R.id.mediaName);
+
+        mediaAudio = findViewById(R.id.mediaAudio);
+        mediaDownload = findViewById(R.id.mediaDownload);
+        mediaFile = findViewById(R.id.mediaFile);
+
+        basicCnt = findViewById(R.id.basicCnt);
+        audioCnt = findViewById(R.id.audioCnt);
+        downloadCnt = findViewById(R.id.downloadCnt);
+
 
         mediaStore.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MediaStoreList.class);
-            startActivityForResult(intent, REQUEST_CODE_MEDIA);
+            boolean flag = true;
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flag = isExternalStorageReadable();
+            }
+
+            if(flag) {
+                Intent intent = new Intent(this, MediaStoreList.class);
+                startActivityForResult(intent, REQUEST_CODE_MEDIA);
+            }
         });
 
         search.setOnClickListener(v -> {
             getBasicAlarm();
         });
 
-        searchDownload.setOnClickListener(v -> {
-            boolean flag = isExternalStorageReadable();
-            if(flag) {
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    getDownloads();
-                } else {
-                    getMediaStore();
-                }
+        mediaAudio.setOnClickListener(v -> {
+            boolean flag = true;
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flag = isExternalStorageReadable();
+            }
+
+            if(flag) { getMediaAudio(); }
+        });
+
+        mediaDownload.setOnClickListener(v -> {
+            boolean flag = true;
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                flag = isExternalStorageReadable();
+                if(flag) { getMediaDownload(); }
             }
         });
+
+        mediaFile.setOnClickListener(v -> {
+            boolean flag = true;
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flag = isExternalStorageReadable();
+            }
+            if(flag) {
+                getFiles();
+            }
+        });
+
     }
 
     private void getBasicAlarm() {
         // content://media/external_primary/audio/media/21?title=Castle&canonical=1
-
         RingtoneManager ringtoneManager = new RingtoneManager(this);
         ringtoneManager.setType(RingtoneManager.TYPE_ALL);
         Cursor cursor = ringtoneManager.getCursor();
 
-        if(cursor.getCount() == 0) {
-            Log.e("TAG", "cursor null or cursor is empty");
-        } else {
-            ArrayList<Ringtone> ringtoneList = new ArrayList<>();
-
-            while(cursor.moveToNext()) {
-                int pos = cursor.getPosition();
-                String title = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
-                Uri uri = ringtoneManager.getRingtoneUri(pos);
-
-                ringtoneList.add(new Ringtone(title, uri.toString()));
-            }
-
-            Log.d("BasicAlarm", "success" + ringtoneList.size());
-        }
+        basicCnt.setText(cursor.getCount()+"");
     }
 
-//    /data/media/0/Download/
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    public void getDownloads() {
-        Uri uri = MediaStore.Files.getContentUri("internal");
-        String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "=" +
-                MediaStore.Files.FileColumns.MEDIA_TYPE_AUDIO;
-
-        String[] projection = new String[] {
-                MediaStore.Audio.Media._ID
+    public void getMediaDownload() {
+        Uri externalUri = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+        String[] projection = new String[]{
+                MediaStore.Downloads._ID,
+                MediaStore.Downloads.TITLE
         };
 
-        Cursor cursor = getContentResolver().query(uri,
-                null,
-                selection,null,null);
+        Cursor cursor = getContentResolver().query(externalUri, projection,
+                null, null,
+                MediaStore.Downloads.TITLE + " ASC");
 
-        if(cursor.getCount() == 0) {
-            Log.e("downloads", "cursor null or cursor is empty");
-        } else {
-            while(cursor.moveToNext()) {
-                String title = cursor.getString(0);
-                Log.d("downloads", title);
-            }
-        }
+        downloadCnt.setText(cursor.getCount()+"");
     }
 
-    public void getMediaStore() {
+    public void getMediaAudio() {
         Uri externalUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
 
         String[] projection = new String[]{
@@ -117,30 +132,38 @@ public class MainActivity extends AppCompatActivity {
         Cursor cursor = getContentResolver().query(externalUri, projection,
                 null, null,
                 MediaStore.Audio.Media.TITLE + " ASC");
-        Log.d("getMediaStore", cursor.getCount()+"");
 
-        if (cursor.getCount() == 0) {
-            Log.e("audio", "cursor null or cursor is empty");
-        } else {
-            while(cursor.moveToNext()) {
-                String str = cursor.getString(0);
-                String title = cursor.getString(1);
-                String contentUrl = externalUri.toString() + "/" + cursor.getString(0);
-                Log.d("title", title);
-                Log.d("contentUrl", contentUrl);
-            }
-        }
+        audioCnt.setText(cursor.getCount()+"");
     }
 
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public boolean isExternalStorageReadable() {
-        String state = Environment.getExternalStorageState();
-        if(Environment.MEDIA_MOUNTED.equals(state) ||
-                                    Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            Log.d("외부저장소", "접근 true");
-            return true;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if(checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_DENIED) {
+                showDialogForExternalStorage();
+                return false;
+            }
         }
-        Log.d("외부저장소", "접근 false");
-        return false;
+
+        return true;
+    }
+
+    public void showDialogForExternalStorage() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("권한 요청")
+                .setMessage("스마트폰에 저장된 mp3파일에 접근을 허용해주세요.")
+                .setNeutralButton("권한 설정", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                                .setData(Uri.parse("package:" + getApplicationContext().getPackageName()));
+                        startActivity(intent);
+                    }
+                })
+                .setCancelable(true);
+                builder.show();
     }
 
     @Override
@@ -156,5 +179,21 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    public void getFiles() {
+        Uri uri = MediaStore.Files.getContentUri("external");
+        String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "=" +
+                MediaStore.Files.FileColumns.MEDIA_TYPE_AUDIO;
+
+        String[] projection = new String[] {
+                MediaStore.Audio.Media._ID
+        };
+
+        Cursor cursor = getContentResolver().query(uri,
+                null,
+                selection,null,null);
+
+        Toast.makeText(getApplicationContext(), cursor.getCount()+"", Toast.LENGTH_SHORT).show();
     }
 }

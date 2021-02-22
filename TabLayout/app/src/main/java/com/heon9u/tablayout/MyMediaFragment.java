@@ -65,11 +65,7 @@ public class MyMediaFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ringtoneList = new ArrayList<>();
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-//          getDownloads();
-        } else {
-            getMediaStore();
-        }
+        getMediaStore();
     }
 
     public void getMediaStore() {
