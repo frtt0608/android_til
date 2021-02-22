@@ -50,8 +50,7 @@ public class MainActivity extends AppCompatActivity {
         basicCnt = findViewById(R.id.basicCnt);
         audioCnt = findViewById(R.id.audioCnt);
         downloadCnt = findViewById(R.id.downloadCnt);
-
-
+        
         mediaStore.setOnClickListener(v -> {
             boolean flag = true;
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -78,9 +77,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mediaDownload.setOnClickListener(v -> {
-            boolean flag = true;
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                flag = isExternalStorageReadable();
+                boolean flag = isExternalStorageReadable();
                 if(flag) { getMediaDownload(); }
             }
         });

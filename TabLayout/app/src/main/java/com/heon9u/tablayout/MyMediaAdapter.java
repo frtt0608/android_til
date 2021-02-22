@@ -20,7 +20,6 @@ import java.util.ArrayList;
 public class MyMediaAdapter extends RecyclerView.Adapter<MyMediaAdapter.MyMediaViewHolder> {
 
     public int selectedItem = -1;
-    public static MediaPlayer mediaPlayer = new MediaPlayer();
     private Context context;
     private ArrayList<Ringtone> ringtoneList;
 
