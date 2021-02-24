@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">AdMob</string>
+    <string name="AdMob_ID">ca-app-pub-8873545602200071~1404847718</string>
+    <string name="sample_ID">ca-app-pub-3940256099942544~3347511713</string>
 </resources>
