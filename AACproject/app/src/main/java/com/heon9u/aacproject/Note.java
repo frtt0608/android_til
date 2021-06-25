@@ -3,7 +3,7 @@ package com.heon9u.aacproject;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "not_table")
+@Entity(tableName = "note_table")
 public class Note {
 
     @PrimaryKey(autoGenerate = true)
