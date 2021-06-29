@@ -1,5 +1,6 @@
 package com.heon9u.aacproject;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,12 +34,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         FloatingActionButton buttonAddNote = findViewById(R.id.button_add_note);
-        buttonAddNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AddEditNoteActivity.class);
-                startActivityForResult(intent, ADD_NOTE_REQUEST);
-            }
+
+        buttonAddNote.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, AddEditNoteActivity.class);
+            startActivityForResult(intent, ADD_NOTE_REQUEST);
         });
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
@@ -117,6 +116,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Note not saved", Toast.LENGTH_SHORT).show();
         }
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
