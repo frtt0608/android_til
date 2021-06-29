@@ -7,6 +7,11 @@ import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
 public class NoteRepository {
     private NoteDao noteDao;
     private LiveData<List<Note>> allNotes;
@@ -17,79 +22,47 @@ public class NoteRepository {
         allNotes = noteDao.getAllNotes();
     }
 
-    public void insert(Note note) {
-        new InsertNoteAsyncTask(noteDao).execute(note);
-    }
+    public void insert(Note note) { insertNoteRxJava(note); }
 
     public void update(Note note) {
-        new UpdateNoteAsyncTask(noteDao).execute(note);
+        updateNoteRxJava(note);
     }
 
     public void delete(Note note) {
-        new DeleteNoteAsyncTask(noteDao).execute(note);
+        deleteNoteRxJava(note);
     }
 
-    public void deleteAllNotes() {
-        new DeleteAllNotesAsyncTask(noteDao).execute();
-    }
+    public void deleteAllNotes() { deleteAllNotesRxJava(); }
 
     public LiveData<List<Note>> getAllNotes() {
         return allNotes;
     }
 
-    private static class InsertNoteAsyncTask extends AsyncTask<Note, Void, Void> {
-        private NoteDao noteDao;
-
-        private InsertNoteAsyncTask(NoteDao noteDao) {
-            this.noteDao = noteDao;
-        }
-
-        @Override
-        protected Void doInBackground(Note... notes) {
-            noteDao.insert(notes[0]);
-            return null;
-        }
+    private void insertNoteRxJava(Note note) {
+        noteDao.insert(note)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe();
     }
 
-    private static class UpdateNoteAsyncTask extends AsyncTask<Note, Void, Void> {
-        private NoteDao noteDao;
-
-        private UpdateNoteAsyncTask(NoteDao noteDao) {
-            this.noteDao = noteDao;
-        }
-
-        @Override
-        protected Void doInBackground(Note... notes) {
-            noteDao.update(notes[0]);
-            return null;
-        }
+    private void updateNoteRxJava(Note note) {
+        noteDao.update(note)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe();
     }
 
-    private static class DeleteNoteAsyncTask extends AsyncTask<Note, Void, Void> {
-        private NoteDao noteDao;
-
-        private DeleteNoteAsyncTask(NoteDao noteDao) {
-            this.noteDao = noteDao;
-        }
-
-        @Override
-        protected Void doInBackground(Note... notes) {
-            noteDao.delete(notes[0]);
-            return null;
-        }
+    private void deleteNoteRxJava(Note note) {
+        noteDao.delete(note)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe();
     }
 
-    private static class DeleteAllNotesAsyncTask extends AsyncTask<Note, Void, Void> {
-        private NoteDao noteDao;
-
-        private DeleteAllNotesAsyncTask(NoteDao noteDao) {
-            this.noteDao = noteDao;
-        }
-
-        @Override
-        protected Void doInBackground(Note... notes) {
-            noteDao.deleteAllNotes();
-            return null;
-        }
+    private void deleteAllNotesRxJava() {
+        noteDao.deleteAllNotes()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe();
     }
 }

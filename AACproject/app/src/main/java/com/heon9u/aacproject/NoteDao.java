@@ -9,23 +9,23 @@ import androidx.room.Update;
 
 import java.util.List;
 
+import io.reactivex.rxjava3.core.Completable;
+
 @Dao
 public interface NoteDao {
 
     @Insert
-    void insert(Note note);
+    Completable insert(Note note);
 
     @Update
-    void update(Note note);
+    Completable update(Note note);
 
     @Delete
-    void delete(Note note);
+    Completable delete(Note note);
 
     @Query("DELETE FROM note_table")
-    void deleteAllNotes();
+    Completable deleteAllNotes();
 
     @Query("SELECT * FROM note_table ORDER BY priority DESC")
     LiveData<List<Note>> getAllNotes();
-
-
 }
