@@ -32,23 +32,6 @@ public abstract class NoteDatabase extends RoomDatabase {
         @Override
         public void onCreate(@NonNull SupportSQLiteDatabase db) {
             super.onCreate(db);
-            new PopulateDbAsyncTask(instance).execute();
         }
     };
-
-    private static class PopulateDbAsyncTask extends AsyncTask<Void, Void, Void> {
-        private NoteDao noteDao;
-
-        private PopulateDbAsyncTask(NoteDatabase db) {
-            noteDao = db.noteDao();
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            noteDao.insert(new Note("Title1", "Description 1", 1));
-            noteDao.insert(new Note("Title2", "Description 2", 2));
-            noteDao.insert(new Note("Title3", "Description 3", 3));
-            return null;
-        }
-    }
 }
