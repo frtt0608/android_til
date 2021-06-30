@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -19,6 +20,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.heon9u.aacproject.databinding.ActivityMainBinding;
 
 import java.util.List;
 
@@ -27,18 +29,13 @@ public class MainActivity extends AppCompatActivity {
     public static final int EDIT_NOTE_REQUEST = 2;
 
     private NoteViewModel noteViewModel;
+    public ActivityMainBinding mainBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        FloatingActionButton buttonAddNote = findViewById(R.id.button_add_note);
-
-        buttonAddNote.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, AddEditNoteActivity.class);
-            startActivityForResult(intent, ADD_NOTE_REQUEST);
-        });
+        mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        mainBinding.setMainActivity(this);
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -80,6 +77,11 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, EDIT_NOTE_REQUEST);
             }
         });
+    }
+
+    public void addClick(View view) {
+        Intent intent = new Intent(MainActivity.this, AddEditNoteActivity.class);
+        startActivityForResult(intent, ADD_NOTE_REQUEST);
     }
 
     @Override

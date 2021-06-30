@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name="mainActivity"
+            type="com.heon9u.aacproject.MainActivity" />
+
+    </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
 
@@ -22,7 +28,8 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_add"
             android:layout_gravity="bottom|end"
-            android:layout_margin="32dp"/>
+            android:layout_margin="32dp"
+            android:onClick="@{mainActivity::addClick}"/>
 
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
