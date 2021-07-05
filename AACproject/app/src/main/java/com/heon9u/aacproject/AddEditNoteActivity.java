@@ -2,6 +2,7 @@ package com.heon9u.aacproject;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,6 +12,8 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.Toast;
+
+import com.heon9u.aacproject.databinding.ActivityAddNoteBinding;
 
 public class AddEditNoteActivity extends AppCompatActivity {
 
@@ -23,15 +26,18 @@ public class AddEditNoteActivity extends AppCompatActivity {
     public static final String EXTRA_PRIORITY =
             "com.heon9u.aacproject.EXTRA_PRIORITY";
 
-
+    public String targetTitle, targetDes;
+    public int targetPriority;
     private EditText editTextTitle;
     private EditText editTextDescription;
     private NumberPicker numberPickerPriority;
+    Note note;
+    ActivityAddNoteBinding addNoteBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_note);
+        addNoteBinding = DataBindingUtil.setContentView(this, R.layout.activity_add_note);
 
         editTextTitle = findViewById(R.id.edit_text_title);
         editTextDescription = findViewById(R.id.edit_text_description);
@@ -46,9 +52,13 @@ public class AddEditNoteActivity extends AppCompatActivity {
 
         if (intent.hasExtra(EXTRA_ID)) {
             setTitle("Edit Note");
-            editTextTitle.setText(intent.getStringExtra(EXTRA_TITLE));
-            editTextDescription.setText(intent.getStringExtra(EXTRA_DESCRIPTION));
+            targetTitle = intent.getStringExtra(EXTRA_TITLE);
+            targetDes = intent.getStringExtra(EXTRA_DESCRIPTION);
+            targetPriority = intent.getIntExtra(EXTRA_PRIORITY, 1);
             numberPickerPriority.setValue(intent.getIntExtra(EXTRA_PRIORITY, 1));
+            note = new Note(targetTitle, targetDes, targetPriority);
+            addNoteBinding.setNote(note);
+
         } else {
             setTitle("Add Note");
         }
